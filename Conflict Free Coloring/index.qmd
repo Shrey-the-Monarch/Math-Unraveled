@@ -1,0 +1,2054 @@
+---
+title: "Conflict-Free Coloring of Graphs"
+subtitle: "An expanded walkthrough for undergraduates"
+author: "Shrey Shah"
+date: today
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    toc-title: "Contents"
+    number-sections: true
+    html-math-method: mathjax
+    code-fold: false
+  pdf:
+    toc: true
+    number-sections: true
+    geometry: margin=1in
+    callout-icon: false
+bibliography: references.bib
+---
+
+
+## Why this paper {#sec-why}
+
+::: {.callout-note appearance="simple"}
+**The quick version:** Conflict-Free Coloring describes a situation with interconeccted points 
+or nodes, in a graph. The goal is to take each node, and the nodes attached to it and search 
+for a color that only occurs once. In other words, we're searching for a unique color in that
+node's **neighborhood**. Not every node has to be colored, but every node's neighborhood must contain
+at least one unique color. 
+:::
+
+There are numerous reasons we'd want to establish whether a conflict free-coloring was possible,
+and more frequently how to achieve it with as few colors as possible. The "colors"
+being referred to are identifiers, and can represent anything from a unique frequency to 
+a data signature like a clearance level. Therefore, finding out how to achieve conflict free 
+coloring with the minimum number of colors, can prove useful in a slew of optimization problems. 
+
+A key example would be in the case of smart phones and cell towers. 
+Cities and public planners want to establish as few cell towers as possible
+(because of how notoriously costly they are), while ensuring that there is no
+location, lacking a signal. Cell towers have a limited number of frequencies they can use
+establish network access with your phone. If no cell tower in range uses a unique frequency,
+then the cell phone will receive multiple frequencies of the same kind at the same time,
+and these signals will collide, causing interference, and preventing network connection. This
+use of frequencies extends to almost every form of wireless communication, including in drone
+swarms, where robots have to communicate their positions with at least one other nearby drone 
+to prevent collision. 
+
+
+The paper, "Conflict-Free Coloring of Graphs", by Abel et al. establishes that if a 
+given graph does not contain a complete minor of size $k + 1$ (where a minor is a graph
+obtained from the initial graph by contracting or deleting an edge or edges, and/or deleting 
+isolated vertices), then the graph is conflict free colorable with k colors for closed neighborhoods. The paper further proves that all planar graphs (which are graphs that can be arranged such that no two edges overlap), are always conflict free-colorable with 3 colors, though less than 3 colors may suffice. The paper also establishes computational complexity for various methods of conflict free coloring with specific constraints. The paper tackles the algorithmic complexity of minimizing the number of colors and the number of colored vertices, for planar graphs (and variants of planar graphs). They finally establish that for open neighborhoods, every planar **bipartite** graph can be conflict free colored with 4 or fewer
+colors, and every planar graph has a conflict-free coloring with at most 8 colors.
+
+### What this document adds
+
+If any of the above purposes of the paper seemed esoteric or complex, that's completely normal. The purpose
+of this document is to simplify this research while exploring it further. This document aims to reconstruct 
+the findings of the paper by more extensively defining key terms, adding more vizualizations (especially 
+because they can help abstract thinking about graphs), expanding upon the lemmas, subproofs, and algorithms
+found throughout the paper. 
+
+## What you need to know first {#sec-prereqs}
+
+You will need a working knowledge of very elementary graph theory to understand the concepts. If you need a 
+refresher, this [blog](https://thepolymathmind.blogspot.com/2026/08/introduction-to-graph-theory.html) has a 
+quick and holistic one.
+
+
+**Open and Closed Neighborhoods:** An open neighborhood of a vertex v is the set of vertices adjacent to v. A closed neighborhood 
+of a vertex v is the set of vertices adjacent to v, and the vertex v itself. Both kinds of neighborhoods are used throughout the 
+paper, and the paper generally splits it's various proofs by which type of neighborhood is being used.
+
+::: {layout-ncol=2}
+
+```{dot}
+//| label: fig-open-nbhd
+//| fig-cap: "$N(v) = \\{a, b, c\\}$"
+//| fig-width: 2.8
+graph G {
+  layout=neato
+  bgcolor="transparent"
+  node [shape=circle, style=filled, fixedsize=true, width=0.3, height=0.3,
+        fontname="Helvetica", fontsize=10, penwidth=0.8,
+        color="#5F5E5A", fontcolor="#2C2C2A", fillcolor="#F1EFE8"]
+  edge [penwidth=0.8, color="#888780"]
+  v [pos="0,0!",     fillcolor="#FAECE7", color="#993C1D"]
+  a [pos="-0.8,0.7!",  fillcolor="#9FE1CB"]
+  b [pos="-0.8,-0.7!", fillcolor="#9FE1CB"]
+  c [pos="0.9,0!",     fillcolor="#9FE1CB"]
+  d [pos="1.8,0!"]
+  v -- a; v -- b; v -- c; c -- d
+}
+```
+
+```{dot}
+//| label: fig-closed-nbhd
+//| fig-cap: "$N[v] = \\{v, a, b, c\\}$"
+//| fig-width: 2.8
+graph G {
+  layout=neato
+  bgcolor="transparent"
+  node [shape=circle, style=filled, fixedsize=true, width=0.3, height=0.3,
+        fontname="Helvetica", fontsize=10, penwidth=0.8,
+        color="#5F5E5A", fontcolor="#2C2C2A", fillcolor="#F1EFE8"]
+  edge [penwidth=0.8, color="#888780"]
+  v [pos="0,0!",       fillcolor="#9FE1CB", color="#0F6E56"]
+  a [pos="-0.8,0.7!",  fillcolor="#9FE1CB"]
+  b [pos="-0.8,-0.7!", fillcolor="#9FE1CB"]
+  c [pos="0.9,0!",     fillcolor="#9FE1CB"]
+  d [pos="1.8,0!"]
+  v -- a; v -- b; v -- c; c -- d
+}
+```
+
+:::
+
+**Complete Bipartite Graphs:** A complete bipartite graph is a graph whose vertices can be split into two disjoint sets, such that for every vertex in one set, there is an edge to every vertex in the other set, and no vertices in the same set are connected by an edge. A complete bipartite graph with m vertices in one set and n vertices in the other is denoted $K_{m,n}$.
+
+::: {layout-ncol=2}
+
+```{dot}
+//| label: fig-k13
+//| fig-cap: "$K_{1,3}$, the star on four vertices"
+//| fig-width: 2.0
+graph G {
+  layout=neato
+  bgcolor="transparent"
+  node [shape=circle, style=filled, fixedsize=true, width=0.3, height=0.3,
+        fontname="Helvetica", fontsize=10, penwidth=0.8,
+        color="#5F5E5A", fontcolor="#2C2C2A"]
+  edge [penwidth=0.8, color="#888780"]
+  u [pos="0,0!",     fillcolor="#9FE1CB"]
+  a [pos="1.1,0.7!", fillcolor="#F5C4B3"]
+  b [pos="1.1,0!",   fillcolor="#F5C4B3"]
+  c [pos="1.1,-0.7!", fillcolor="#F5C4B3"]
+  u -- a; u -- b; u -- c
+}
+```
+
+```{dot}
+//| label: fig-k33
+//| fig-cap: "$K_{3,3}$, with all nine edges present"
+//| fig-width: 2.0
+graph G {
+  layout=neato
+  bgcolor="transparent"
+  node [shape=circle, style=filled, fixedsize=true, width=0.3, height=0.3,
+        fontname="Helvetica", fontsize=10, penwidth=0.8,
+        color="#5F5E5A", fontcolor="#2C2C2A"]
+  edge [penwidth=0.8, color="#888780"]
+  u1 [pos="0,0.75!",  fillcolor="#9FE1CB"]
+  u2 [pos="0,0!",     fillcolor="#9FE1CB"]
+  u3 [pos="0,-0.75!", fillcolor="#9FE1CB"]
+  v1 [pos="1.3,0.75!",  fillcolor="#F5C4B3"]
+  v2 [pos="1.3,0!",     fillcolor="#F5C4B3"]
+  v3 [pos="1.3,-0.75!", fillcolor="#F5C4B3"]
+  u1 -- v1; u1 -- v2; u1 -- v3
+  u2 -- v1; u2 -- v2; u2 -- v3
+  u3 -- v1; u3 -- v2; u3 -- v3
+}
+```
+
+:::
+
+**Edge Subdivision:** For an edge $e \in E(G)$ for a graph G, subdiving $e = uv$ means deleting $e$ ($E(G) \setminus \{e\}$), adding a new vertex $w$,
+and adding the edges $uw$ and $wv$. A graph obtained from $G$ by subdividing edges is called a **subdivision of $G$**
+
+```{dot}
+//| label: fig-subdivision
+//| fig-cap: "Subdividing $e = uv$ inserts $w$ along the edge"
+//| fig-width: 4.2
+graph G {
+  layout=neato
+  bgcolor="transparent"
+  node [shape=circle, style=filled, fixedsize=true, width=0.3, height=0.3,
+        fontname="Helvetica", fontsize=10, penwidth=0.8,
+        color="#5F5E5A", fontcolor="#2C2C2A", fillcolor="#F1EFE8"]
+  edge [penwidth=0.8, color="#888780"]
+  u  [pos="0,0!"]
+  v  [pos="1.1,0!"]
+  u2 [pos="2.6,0!",  label="u"]
+  w  [pos="3.35,0!", fillcolor="#9FE1CB", color="#0F6E56"]
+  v2 [pos="4.1,0!",  label="v"]
+  u -- v [color="#D85A30", penwidth=1.4]
+  u2 -- w; w -- v2
+}
+```
+
+
+**Edge Contraction:** For an edge $e \in E(G)$, where G is a graph and $e = uv$, and for a vertex w $\notin V(G)$, the **edge contraction** of $e$ is the graph obtained by deleting $e$ and deleting the vertices $u$ and $v$, replacing them with $w$, and making $w$ adjacent to every neighbor of $u$ and every neighbor of $v$. 
+
+::: {layout-ncol=3}
+
+```{dot}
+//| label: fig-contract-1
+//| fig-cap: "$G$, with $e = uv$"
+//| fig-width: 2.0
+graph G {
+  layout=neato
+  bgcolor="transparent"
+  node [shape=circle, style=filled, fixedsize=true, width=0.3, height=0.3,
+        fontname="Helvetica", fontsize=10, penwidth=0.8,
+        color="#5F5E5A", fontcolor="#2C2C2A", fillcolor="#F1EFE8"]
+  edge [penwidth=0.8, color="#888780"]
+  v [pos="0,0.65!"]
+  u [pos="0,-0.65!"]
+  a [pos="-0.95,0!", fillcolor="#CECBF6"]
+  b [pos="0.95,0!",  fillcolor="#CECBF6"]
+  v -- u [color="#D85A30", penwidth=1.6, label="e",
+          fontcolor="#993C1D", fontsize=10]
+  v -- a; u -- a; v -- b; u -- b
+}
+```
+
+```{dot}
+//| label: fig-contract-2
+//| fig-cap: "After identifying $u$ and $v$ as $w$"
+//| fig-width: 2.0
+graph G {
+  layout=dot
+  rankdir=LR
+  bgcolor="transparent"
+  nodesep=0.4
+  node [shape=circle, style=filled, fixedsize=true, width=0.3, height=0.3,
+        fontname="Helvetica", fontsize=10, penwidth=0.8,
+        color="#5F5E5A", fontcolor="#2C2C2A", fillcolor="#F1EFE8"]
+  edge [penwidth=0.8, color="#888780"]
+  w [fillcolor="#F5C4B3", color="#993C1D"]
+  a [fillcolor="#CECBF6"]
+  b [fillcolor="#CECBF6"]
+  a -- w; a -- w
+  w -- b; w -- b
+  w -- w [color="#D85A30", penwidth=1.2]
+}
+```
+
+```{dot}
+//| label: fig-contract-3
+//| fig-cap: "$G / e$, loops and parallel edges removed"
+//| fig-width: 2.0
+graph G {
+  layout=neato
+  bgcolor="transparent"
+  node [shape=circle, style=filled, fixedsize=true, width=0.3, height=0.3,
+        fontname="Helvetica", fontsize=10, penwidth=0.8,
+        color="#5F5E5A", fontcolor="#2C2C2A", fillcolor="#F1EFE8"]
+  edge [penwidth=0.8, color="#888780"]
+  w [pos="0,0!",     fillcolor="#F5C4B3", color="#993C1D"]
+  a [pos="-0.9,0!",  fillcolor="#CECBF6"]
+  b [pos="0.9,0!",   fillcolor="#CECBF6"]
+  a -- w -- b
+}
+```
+
+:::
+
+Identifying $u$ and $v$ produces a multigraph, with a loop where $e$ used to be and a
+parallel pair for each common neighbor; deleting those recovers a simple graph.
+
+**Wagner-Kurotawski Theorem:** These are two separate theorems, both of which establish that a graph is planar if and and only if it does not contain a $K_5$ or $K_{3,3}$ minor, and does not contain a subgraph that is a subdivision of $K_5$ or $K_{3,3}$. $K_{3,3}$ is shown by @fig-k33 and $K_{5}$, the complete graph on k vertices, is drawn below for reference, remember a planar graph is one that can rearranged on a flat surface such that no edges cross over each other.
+
+```{dot}
+//| label: fig-k5
+//| fig-cap: "$K_5$, the complete graph on five vertices"
+//| fig-width: 2.2
+graph G {
+  layout=neato
+  bgcolor="transparent"
+  node [shape=circle, style=filled, fixedsize=true, width=0.3, height=0.3,
+        fontname="Helvetica", fontsize=10, penwidth=0.8,
+        color="#5F5E5A", fontcolor="#2C2C2A", fillcolor="#9FE1CB"]
+  edge [penwidth=0.8, color="#888780"]
+  1 [pos="0,1!"]
+  2 [pos="0.951,0.309!"]
+  3 [pos="0.588,-0.809!"]
+  4 [pos="-0.588,-0.809!"]
+  5 [pos="-0.951,0.309!"]
+  1 -- 2; 1 -- 3; 1 -- 4; 1 -- 5
+  2 -- 3; 2 -- 4; 2 -- 5
+  3 -- 4; 3 -- 5
+  4 -- 5
+}
+```
+
+**NP-completeness:** A problem is in the NP class, if a solution can be verified in polynomial time ($O(n^c)$, where c is a constant). A problem is in the subclass P, if it can be solved in polynomial time. Whether all NP problems can be solved in polynomial time is an open question. An NP-Hard problem is one where there is no problem in the NP class strictly harder than it (Note: this does not mean that the problem is is NP, it could take longer than polynomial time to verify a solution). An NP-Complete problem is one that is both NP-Hard and in NP.
+
+**Polynomial-time Reductions:** A reduction is a way to solve for the algorithmic complexity of a problem, say A, by transforming it into another problem B, whose complexity we do know. For our purposes, we will be using polynomial-time reductions, which means that the transformation from A to B must be done in polynomial time. If we can show that a problem A can be reduced to a problem B, then we know that A is no harder than B. If we can show that a problem B can be reduced to a problem A, then we know that B is no harder than A. If we can show both, then we know that A and B are of equal complexity.
+
+**Dynamic programming on trees:** Dynamic programming solves a large problem by breaking it into subproblems, computing each one exactly once, and storing the result. It pays off when each subproblem can be summarized by a small amount of information, called a *state*, so that the table of stored results stays manageable even when the number of possible solutions becomes enormous.
+
+Trees are unusually well suited to this. Because a tree contains no cycles, deleting a single vertex disconnects it. So if we
+choose an arbitrary root and write $T_v$ for the subtree hanging below a vertex $v$, then $T_v$ meets the rest of the tree only at
+$v$ itself. Nothing inside $T_v$ is visible from outside except through that one vertex.
+
+This is what makes a small summary sufficient. For each vertex we record the best value achievable inside its subtree, once for each
+state of that vertex, and then we discard the subtree entirely. Working upward from the leaves, every vertex computes its values
+from the values already stored at its children. At the root we combine the stored states according to what the problem asks for:
+the maximum, the minimum, or simply whether any valid option survives at all.
+
+
+## Intro to Conflict-Free Coloring {#sec-definitions}
+
+::: {#def-cf}
+
+### Conflict-free coloring
+
+A **partial $k$-coloring** of $G$ is an assignment $\chi : V' \to \{1, \dots, k\}$
+for some subset $V' \subseteq V(G)$; vertices outside $V'$ are **uncolored**. Such a
+$\chi$ is **conflict-free** with respect to closed neighborhoods if for every
+$v \in V(G)$ there is a vertex $w \in N[v] \cap V'$ whose color is unique in $N[v]$ —
+that is, $\chi(w') \neq \chi(w)$ for every other $w' \in N[v] \cap V'$. We call $w$ the
+**conflict-free neighbor** of $v$. The **conflict-free chromatic number**
+$\chi_{CF}(G)$ is the smallest $k$ for which such a coloring exists.
+
+Two key notes to keep in mind. First, the coloring is *partial*: leaving vertices uncolored is permitted, and is often necessary. Second, an uncolored vertex still needs a conflict-free neighbor — being uncolored exempts $v$ from carrying a color, not from satisfying the condition.
+
+The all-vertices variant, in which every vertex must be colored, is also studied in this paper. The
+two never differ by more than one color, since a fresh color can be handed to whatever
+was left uncolored. However, some of the paper's tight results don't work without partial coloring.
+:::
+
+
+Throughout, **orange** is color 1, **green** is color 2, and a **hollow** vertex is
+uncolored. Uncolored vertices are permitted — see the remark on partial colorings
+below — and are drawn hollow rather than omitted, since they still belong to the
+neighborhoods being checked.
+
+```{dot}
+//| label: fig-cf-legend
+//| fig-cap: "Color convention used in every figure below"
+//| fig-width: 3.4
+//| fig-height: 1.21
+graph legend {
+  layout=neato
+  bgcolor="transparent"
+  node [shape=circle, style=filled, fixedsize=true, width=0.3, height=0.3,
+        fontname="Helvetica", fontsize=10, penwidth=0.8,
+        color="#5F5E5A", fontcolor="#2C2C2A", fillcolor="#F1EFE8"]
+  c1 [pos="0,0!",   label="1", fillcolor="#EF9F27", color="#854F0B"]
+  c2 [pos="1.1,0!", label="2", fillcolor="#5DCAA5", color="#0F6E56"]
+  c0 [pos="2.2,0!", label=""]
+  node [shape=plaintext, style="", fixedsize=false, fontsize=9]
+  l1 [pos="0,-0.5!",   label="color 1"]
+  l2 [pos="1.1,-0.5!", label="color 2"]
+  l0 [pos="2.2,-0.5!", label="uncolored"]
+}
+```
+
+### A single vertex: $\chi_{CF} = 1$
+
+::: {layout-ncol=3}
+
+```{dot}
+//| label: fig-cf-k1
+//| fig-cap: "$K_1$: $\\chi_{CF} = 1$"
+//| fig-width: 1.2
+//| fig-height: 1.2
+graph k1 {
+  layout=neato
+  bgcolor="transparent"
+  node [shape=circle, style=filled, fixedsize=true, width=0.3, height=0.3,
+        fontname="Helvetica", fontsize=10, penwidth=0.8,
+        color="#5F5E5A", fontcolor="#2C2C2A", fillcolor="#F1EFE8"]
+  v [pos="0,0!", fillcolor="#EF9F27", color="#854F0B"]
+}
+```
+
+```{dot}
+//| label: fig-cf-k2
+//| fig-cap: "$K_2$: $\\chi_{CF} = 1$"
+//| fig-width: 1.8
+//| fig-height: 0.66
+graph k2 {
+  layout=neato
+  bgcolor="transparent"
+  node [shape=circle, style=filled, fixedsize=true, width=0.3, height=0.3,
+        fontname="Helvetica", fontsize=10, penwidth=0.8,
+        color="#5F5E5A", fontcolor="#2C2C2A", fillcolor="#F1EFE8"]
+  edge [penwidth=0.8, color="#888780"]
+  u [pos="0,0!",   fillcolor="#EF9F27", color="#854F0B"]
+  v [pos="0.9,0!"]
+  u -- v
+}
+```
+
+```{dot}
+//| label: fig-cf-p3
+//| fig-cap: "$P_3$: $\\chi_{CF} = 1$"
+//| fig-width: 2.0
+//| fig-height: 0.45
+graph p3 {
+  layout=neato
+  bgcolor="transparent"
+  node [shape=circle, style=filled, fixedsize=true, width=0.3, height=0.3,
+        fontname="Helvetica", fontsize=10, penwidth=0.8,
+        color="#5F5E5A", fontcolor="#2C2C2A", fillcolor="#F1EFE8"]
+  edge [penwidth=0.8, color="#888780"]
+  a [pos="0,0!"]
+  b [pos="0.9,0!", fillcolor="#EF9F27", color="#854F0B"]
+  c [pos="1.8,0!"]
+  a -- b -- c
+}
+```
+
+:::
+
+For $K_1 = \{v\}$ we have $N[v] = \{v\}$. Coloring $v$ with color 1 makes that color
+occur exactly once in $N[v]$, so one color suffices, and zero colors leave $N[v]$
+with no colors at all. Hence $\chi_{CF}(K_1) = 1$.
+
+For $K_2$ on $\{u,v\}$, color $u$ and leave $v$ uncolored. Then $N[u] = N[v] = \{u,v\}$
+contains color 1 exactly once, so both vertices are satisfied by $u$. Note that
+coloring *both* vertices 1 would fail — this is the first sign that adding color can
+destroy a conflict-free coloring, which is why the definition permits uncolored
+vertices.
+
+For the path $a - b - c$, color the middle vertex $b$. Then
+$N[a] = \{a,b\}$, $N[b] = \{a,b,c\}$, and $N[c] = \{b,c\}$ all contain $b$ and no other
+colored vertex, so $b$ is the conflict-free witness for all three.
+
+### Complete graphs: $\chi_{CF}(K_n) = 1$
+
+::: {layout-ncol=2}
+
+```{dot}
+//| label: fig-cf-c3
+//| fig-cap: "$C_3 = K_3$: $\\chi_{CF} = 1$"
+//| fig-width: 1.8
+//| fig-height: 1.68
+graph c3 {
+  layout=neato
+  bgcolor="transparent"
+  node [shape=circle, style=filled, fixedsize=true, width=0.3, height=0.3,
+        fontname="Helvetica", fontsize=10, penwidth=0.8,
+        color="#5F5E5A", fontcolor="#2C2C2A", fillcolor="#F1EFE8"]
+  edge [penwidth=0.8, color="#888780"]
+  a [pos="0.5,0.9!", fillcolor="#EF9F27", color="#854F0B"]
+  b [pos="0,0!"]
+  c [pos="1,0!"]
+  a -- b; b -- c; c -- a
+}
+```
+
+```{dot}
+//| label: fig-cf-k4
+//| fig-cap: "$K_4$: $\\chi_{CF} = 1$, while $\\chi(K_4) = 4$"
+//| fig-width: 1.8
+//| fig-height: 1.8
+graph k4 {
+  layout=neato
+  bgcolor="transparent"
+  node [shape=circle, style=filled, fixedsize=true, width=0.3, height=0.3,
+        fontname="Helvetica", fontsize=10, penwidth=0.8,
+        color="#5F5E5A", fontcolor="#2C2C2A", fillcolor="#F1EFE8"]
+  edge [penwidth=0.8, color="#888780"]
+  a [pos="0,1!", fillcolor="#EF9F27", color="#854F0B"]
+  b [pos="1,1!"]
+  c [pos="1,0!"]
+  d [pos="0,0!"]
+  a -- b; b -- c; c -- d; d -- a; a -- c; b -- d
+}
+```
+
+:::
+
+Both follow from one observation. In $K_n$ every vertex is adjacent to every other,
+so $N[v] = V$ for all $v$: there is only one closed neighborhood to check. Color a
+single vertex and leave the remaining $n-1$ uncolored; that color occurs exactly once
+in $V$, and every vertex sees it. So $\chi_{CF}(K_n) = 1$ for all $n \ge 1$.
+
+More generally, the same argument gives $\chi_{CF}(G) = 1$ whenever $G$ has a
+**universal vertex** — a vertex adjacent to all others — since coloring it alone
+witnesses every closed neighborhood. This covers $K_n$, stars, and wheels at once.
+
+::: {.callout-note appearance="simple"}
+**Conflict-free vs. proper coloring.** For closed neighborhoods the two notions are
+related in one direction, and the relation is easy to miss: *every proper coloring is
+already conflict-free*. In a proper coloring no neighbor of $v$ shares $v$'s color, so
+that color occurs exactly once in $N[v]$ and $v$ serves as its own conflict-free
+neighbor. Hence
+$$\chi_{CF}(G) \le \chi_P(G) \quad \text{for every graph } G,$$
+writing $\chi_P$ for the ordinary chromatic number.
+
+The inequality can be arbitrarily loose, and $K_4$ is the cleanest witness: properly
+coloring it needs four colors, since every pair of vertices is adjacent, while
+conflict-free coloring needs one. In general $\chi_P(K_n) = n$ and
+$\chi_{CF}(K_n) = 1$, so the gap grows without bound.
+
+None of this survives the move to open neighborhoods, where $v \notin N(v)$ and the
+"$v$ is its own witness" argument evaporates. There the two parameters are
+incomparable: no constant $c$ satisfies $c \cdot \chi_O(G) \le \chi_P(G)$ for all $G$,
+and none satisfies $c \cdot \chi_P(G) \le \chi_O(G)$ either. So the intuition that
+conflict-free coloring is the easier problem is specific to closed neighborhoods.
+:::
+
+### $K_{2,3}$: the first jump to two colors
+
+```{dot}
+//| label: fig-cf-k23
+//| fig-cap: "$K_{2,3}$ with the 2-side colored: $\\chi_{CF} = 2$"
+//| fig-width: 2.6
+graph k23 {
+  layout=neato
+  bgcolor="transparent"
+  node [shape=circle, style=filled, fixedsize=true, width=0.3, height=0.3,
+        fontname="Helvetica", fontsize=10, penwidth=0.8,
+        color="#5F5E5A", fontcolor="#2C2C2A", fillcolor="#F1EFE8"]
+  edge [penwidth=0.8, color="#888780"]
+  u1 [pos="0,0.9!"]
+  u2 [pos="0,0!"]
+  u3 [pos="0,-0.9!"]
+  w1 [pos="1.4,0.45!",  fillcolor="#EF9F27", color="#854F0B"]
+  w2 [pos="1.4,-0.45!", fillcolor="#5DCAA5", color="#0F6E56"]
+  u1 -- w1; u1 -- w2
+  u2 -- w1; u2 -- w2
+  u3 -- w1; u3 -- w2
+}
+```
+
+Write $U = \{u_1,u_2,u_3\}$ for the side of size three and $W = \{w_1,w_2\}$ for the
+side of size two, so that
+$$N[u_i] = \{u_i, w_1, w_2\}, \qquad N[w_j] = \{w_j, u_1, u_2, u_3\}.$$
+
+**Two colors suffice.** Color $w_1$ with 1 and $w_2$ with 2, leaving $U$ uncolored.
+Each $N[u_i]$ then contains one vertex of each color, so both are unique. $N[w_1]$
+contains only $w_1$ colored, and $N[w_2]$ only $w_2$. Every closed neighborhood has a
+uniquely occurring color, so $\chi_{CF}(K_{2,3}) \le 2$.
+
+**One color does not.** Since $N[u_i]$ depends only on $u_i$ and the two vertices of
+$W$, split on how many of $w_1, w_2$ are colored. The three cases are exhaustive. In
+each figure below, the double-circled vertex is the one left without a witness.
+
+::: {layout-ncol=3}
+
+```{dot}
+//| label: fig-cf-k23-case0
+//| fig-cap: "Neither $w_j$ colored"
+//| fig-width: 2.0
+graph k23a {
+  layout=neato
+  bgcolor="transparent"
+  node [shape=circle, style=filled, fixedsize=true, width=0.3, height=0.3,
+        fontname="Helvetica", fontsize=10, penwidth=0.8,
+        color="#5F5E5A", fontcolor="#2C2C2A", fillcolor="#F1EFE8"]
+  edge [penwidth=0.8, color="#888780"]
+  u1 [pos="0,0.9!",  fillcolor="#EF9F27", color="#854F0B"]
+  u2 [pos="0,0!",    fillcolor="#EF9F27", color="#854F0B"]
+  u3 [pos="0,-0.9!", fillcolor="#EF9F27", color="#854F0B"]
+  w1 [pos="1.4,0.45!", color="#E24B4A", penwidth=2.4, peripheries=2]
+  w2 [pos="1.4,-0.45!"]
+  u1 -- w1; u1 -- w2
+  u2 -- w1; u2 -- w2
+  u3 -- w1; u3 -- w2
+}
+```
+
+```{dot}
+//| label: fig-cf-k23-case1
+//| fig-cap: "Only $w_1$ colored"
+//| fig-width: 2.0
+graph k23b {
+  layout=neato
+  bgcolor="transparent"
+  node [shape=circle, style=filled, fixedsize=true, width=0.3, height=0.3,
+        fontname="Helvetica", fontsize=10, penwidth=0.8,
+        color="#5F5E5A", fontcolor="#2C2C2A", fillcolor="#F1EFE8"]
+  edge [penwidth=0.8, color="#888780"]
+  u1 [pos="0,0.9!"]
+  u2 [pos="0,0!"]
+  u3 [pos="0,-0.9!"]
+  w1 [pos="1.4,0.45!", fillcolor="#EF9F27", color="#854F0B"]
+  w2 [pos="1.4,-0.45!", color="#E24B4A", penwidth=2.4, peripheries=2]
+  u1 -- w1; u1 -- w2
+  u2 -- w1; u2 -- w2
+  u3 -- w1; u3 -- w2
+}
+```
+
+```{dot}
+//| label: fig-cf-k23-case2
+//| fig-cap: "Both $w_j$ colored"
+//| fig-width: 2.0
+graph k23c {
+  layout=neato
+  bgcolor="transparent"
+  node [shape=circle, style=filled, fixedsize=true, width=0.3, height=0.3,
+        fontname="Helvetica", fontsize=10, penwidth=0.8,
+        color="#5F5E5A", fontcolor="#2C2C2A", fillcolor="#F1EFE8"]
+  edge [penwidth=0.8, color="#888780"]
+  u1 [pos="0,0.9!"]
+  u2 [pos="0,0!", color="#E24B4A", penwidth=2.4, peripheries=2]
+  u3 [pos="0,-0.9!"]
+  w1 [pos="1.4,0.45!",  fillcolor="#EF9F27", color="#854F0B"]
+  w2 [pos="1.4,-0.45!", fillcolor="#EF9F27", color="#854F0B"]
+  u1 -- w1; u1 -- w2
+  u2 -- w1; u2 -- w2
+  u3 -- w1; u3 -- w2
+}
+```
+
+:::
+
+*Neither $w_j$ colored.* Then $N[u_i] = \{u_i, w_1, w_2\}$ can only be satisfied by
+$u_i$ itself, so all three of $u_1, u_2, u_3$ are colored 1. But
+$N[w_1] \supseteq U$ now contains color 1 three times and $w_1$ is uncolored, so $w_1$
+has no uniquely occurring color.
+
+*Exactly one $w_j$ colored*, say $w_1$. Every $N[u_i]$ already contains $w_1$, so
+coloring $u_i$ would make color 1 appear twice there; hence all of $U$ is uncolored.
+But then $N[w_2] = \{w_2\} \cup U$ contains no colored vertex at all.
+
+*Both $w_j$ colored.* Then color 1 appears at least twice in every
+$N[u_i] \supseteq \{w_1, w_2\}$, and coloring $u_i$ only raises the count to three.
+So no $u_i$ has a uniquely occurring color in its closed neighborhood.
+
+Every case fails, so $\chi_{CF}(K_{2,3}) \ge 2$ and therefore
+$\chi_{CF}(K_{2,3}) = 2$.
+
+In each earlier example some single vertex was visible
+from everywhere, so coloring it alone settled every neighborhood at once. $K_{2,3}$ is
+the first graph here without such a vertex, and the middle case shows what breaks:
+$w_1$ and $w_2$ are non-adjacent and share all their neighbors, so no single colored
+vertex can serve as the witness for both.
+
+Note that $K_{2,3}$ is not the smallest graph needing two colors — $C_4$ needs two
+on only four vertices, and the argument is the same, since the two diagonal pairs each
+have identical closed neighborhoods. And having no universal vertex is *sufficient for
+nothing*: the path on $3n$ vertices has no universal vertex and still has
+$\chi_{CF} = 1$, by coloring the middle vertex of each consecutive triple. What
+$K_{2,3}$ and $C_4$ add beyond the absence of a universal vertex is the *competition*
+— two vertices with the same closed neighborhood, each needing a witness the other
+cannot supply.
+
+## Proof 1 - Neccessary Coloring {#sec-PF1}
+
+### Lemma 3.2 - The Forcing Gadget
+
+
+Let $N(v)$ be an open neighborhood, meaning vertex $v$ isn't in its own
+neighborhood. Let $N[v] = N(v) \cup \{v\}$ be the closed neighborhood, which is
+the one the conflict-free condition is checked on.
+
+Take two disjoint, independent copies of graph $H$, with $\chi_{CF}(H) = k$, both
+connected to $v$ and to nothing else. Then $v$ must be colored, because:
+
+For the sake of Contradiction, suppose $v$ is uncolored. Then each copy of $H$ has to be conflict-free
+colored on its own, using $k$ colors. We have two $H$-graphs, and every color
+appears at least twice in $N(v)$, meaning nothing in $N[v]$, the closed
+neighborhood, is unique, so $v$ has no conflict-free neighbor. This is a
+contradiction, so $v$ must be colored.
+
+
+If additionally vertex $u$ is adjacent to $v$, and $N(u) \cap N(v)$ contains two
+copies of graph $J$ with $\chi_{CF}(J) = k-1$, connected to nothing but $u$ and
+$v$. Without loss of generality, assume $u$ and $v$ had color $1$. Then we'd have to color $J$ with
+$k-1$ colors, and each color would appear at least twice, and color $1$ appears
+on both $v$ and $u$, meaning $u$ and $v$ see every color twice, so neither has a
+conflict-free neighbor. This is a contradiction, so $u$ and $v$ must have
+distinct colors.
+
+```{dot}
+//| label: fig-lemma32
+//| fig-cap: "The configuration of Lemma 3.2. The two $J$ copies are the only boxes joined to both $u$ and $v$."
+//| fig-width: 5.2
+graph lemma32 {
+  graph [bgcolor="transparent", splines=true, nodesep=0.35, ranksep=1.1]
+  node  [fontname="Helvetica", fontsize=10, penwidth=1.1]
+  edge  [color="#7A7A7A", penwidth=1.0]
+
+  node [shape=circle, style=filled, fixedsize=true, width=0.45, height=0.45]
+  v [label="v", fillcolor="#EF9F27", color="#854F0B"]
+  u [label="u", fillcolor="#ED93B1", color="#993556"]
+
+  node [shape=box, style="rounded,filled", fixedsize=false,
+        fillcolor="#EFE7F7", color="#6B4E9B"]
+  Hv1 [label="H"]; Hv2 [label="H"]
+  Hu1 [label="H"]; Hu2 [label="H"]
+
+  node [fillcolor="#E0F3EC", color="#0F6E56"]
+  J1 [label="J"]; J2 [label="J"]
+
+  { rank=same; v; u; }
+  { rank=same; Hv1; Hv2; J1; J2; Hu1; Hu2; }
+
+  v -- u [penwidth=1.8, color="#333333"]
+  v -- Hv1; v -- Hv2
+  u -- Hu1; u -- Hu2
+  v -- J1; v -- J2
+  u -- J1; u -- J2
+}
+```
+
+Note that for this lemma, $\chi_{CF}(J)$ doesn't have to equal $k-1$, we can do the same thing, if $\chi_{CF}(J) = k$. However,
+the J being $k-1$ colorable will prove useful later, particularly in allowing us to construct a recursion. 
+
+Note that because $u$ and $v$ are colored, $H$ and $J$ can be uncolored because
+every vertex in $H$ is adjacent to $v$, which has a distinct color, and the same
+applies to $J$ where $u$ and $v$ have distinct colors.
+
+
+### Lemma 3.3 - The $G_K$ Hierarchy 
+
+Note we're working with $N[\;]$, the closed neighborhood.
+
+#### Why we need this
+
+To use Lemma 3.2, you need graphs with $\chi_{CF} = k$. We have to build them
+recursively.
+
+#### Base cases
+
+$G_1$ = a single vertex, and $\chi_{CF}(G_1) = 1$.
+
+$G_2 = K_{1,3}$ with the edge $cD$ subdivided, where $K_{1,3}$ is the complete
+bipartite graph with one vertex on one side and $3$ on the other.
+
+::: {layout-ncol=2}
+
+```{dot}
+//| label: fig-g2-star
+//| fig-cap: "$K_{1,3}$, with the edge $cD$ highlighted"
+//| fig-width: 2.6
+graph g2star {
+  graph [bgcolor="transparent", rankdir=LR, nodesep=0.35, ranksep=0.7]
+  node  [fontname="Helvetica", fontsize=11, shape=circle, fixedsize=true,
+         width=0.34, height=0.34, style=filled,
+         fillcolor="#F1EFE8", color="#555555"]
+  edge  [color="#7A7A7A"]
+  A [label="A"]; B [label="B"]; c [label="c"]; D [label="D"]
+  A -- c; B -- c
+  c -- D [color="#BA7517", penwidth=1.8]
+}
+```
+
+```{dot}
+//| label: fig-g2-sub
+//| fig-cap: "$G_2$: the same graph with $cD$ subdivided by $m$"
+//| fig-width: 3.0
+graph g2sub {
+  graph [bgcolor="transparent", rankdir=LR, nodesep=0.35, ranksep=0.7]
+  node  [fontname="Helvetica", fontsize=11, shape=circle, fixedsize=true,
+         width=0.34, height=0.34, style=filled,
+         fillcolor="#F1EFE8", color="#555555"]
+  edge  [color="#7A7A7A"]
+  A [label="A"]; B [label="B"]
+  c [label="c", fillcolor="#EF9F27", color="#854F0B"]
+  m [label="m"]
+  D [label="D", fillcolor="#5DCAA5", color="#0F6E56"]
+  A -- c; B -- c; c -- m; m -- D
+}
+```
+
+:::
+
+$\chi_{CF}(G_2) = 2$, because with one color there are only two cases and both
+fail:
+
+* if $c$ and $D$ are colored, then $N[m]$ doesn't satisfy conflict-free coloring;
+* if $A$ and $B$ are colored, then $N[c]$ doesn't satisfy conflict-free coloring.
+
+::: {layout-ncol=2}
+
+```{dot}
+//| label: fig-g2-case1
+//| fig-cap: "Case 1: $c$ colored, so $m$ has no witness"
+//| fig-width: 3.0
+graph g2case1 {
+  graph [bgcolor="transparent", rankdir=LR, nodesep=0.35, ranksep=0.7]
+  node  [fontname="Helvetica", fontsize=11, shape=circle, fixedsize=true,
+         width=0.34, height=0.34, style=filled,
+         fillcolor="#F1EFE8", color="#555555"]
+  edge  [color="#7A7A7A"]
+  A [label="A"]; B [label="B"]
+  c [label="c", fillcolor="#EF9F27", color="#854F0B"]
+  m [label="m", color="#E24B4A", penwidth=2.4, peripheries=2]
+  D [label="D", fillcolor="#EF9F27", color="#854F0B"]
+  A -- c; B -- c; c -- m; m -- D
+}
+```
+
+```{dot}
+//| label: fig-g2-case2
+//| fig-cap: "Case 2: $c$ uncolored, so $c$ has no witness"
+//| fig-width: 3.0
+graph g2case2 {
+  graph [bgcolor="transparent", rankdir=LR, nodesep=0.35, ranksep=0.7]
+  node  [fontname="Helvetica", fontsize=11, shape=circle, fixedsize=true,
+         width=0.34, height=0.34, style=filled,
+         fillcolor="#F1EFE8", color="#555555"]
+  edge  [color="#7A7A7A"]
+  A [label="A", fillcolor="#EF9F27", color="#854F0B"]
+  B [label="B", fillcolor="#EF9F27", color="#854F0B"]
+  c [label="c", color="#E24B4A", penwidth=2.4, peripheries=2]
+  m [label="m"]; D [label="D"]
+  A -- c; B -- c; c -- m; m -- D
+}
+```
+
+:::
+
+
+::: {.callout-note appearance="simple"}
+Note that the paper is using Closed neighborhoods. The base cases in the recursive algorithm of Lemma 3.3, don't work with open neigborhoods. If we take a single, isolated vertex, $u$, then this vertex is uncolorable on an open nieghborhood; no matter how many k-colors you have, there are no vertices adjacent to $u$ that have a unique color, and we can't count $u$ by the definition of open neighborhood.
+:::
+
+#### The recursive step
+
+**Recursion proof.** Assume we have $\chi_{CF}(G_k) = k$ and
+$\chi_{CF}(G_{k-1}) = k-1$.
+
+* Take a complete graph $G = K_{k+1}$ on $k+1$ vertices.
+* To each vertex $v \in V(K_{k+1})$ attach two disjoint and independent copies of
+  $G_k$, adding an edge from every $v$ to every vertex of both copies of $G_k$.
+* For each edge $e = vw \in E(K_{k+1})$, add two disjoint and independent copies
+  of $G_{k-1}$, where there is an edge from every $v$ and $w$ to every vertex on
+  both copies of $G_{k-1}$.
+
+For $G_{k+1}$ where $k+1 = 3$, $K_3$ is the base.
+
+```{dot}
+//| label: fig-g3
+//| fig-cap: "$G_3$: a $K_3$ core, two copies of $G_2$ on each vertex, two copies of $G_1$ on each edge."
+//| fig-width: 5.5
+graph g3 {
+  layout=neato; graph [bgcolor="transparent", overlap=false, splines=true];
+  node [fontname="Helvetica", fontsize=10, penwidth=1.1];
+  edge [color="#7A7A7A", len=1.5];
+
+  node [shape=circle, style=filled, fixedsize=true, width=0.42, height=0.42];
+  v1 [label="v1", pos="0,2.2!",   fillcolor="#EF9F27", color="#854F0B"];
+  v2 [label="v2", pos="-2,-1.2!", fillcolor="#5DCAA5", color="#0F6E56"];
+  v3 [label="v3", pos="2,-1.2!",  fillcolor="#ED93B1", color="#993556"];
+
+  node [shape=box, style="rounded,filled", fillcolor="#EFE7F7", color="#6B4E9B", width=0.7, height=0.32];
+  a1 [label="G2", pos="-1.3,3.6!"];  a2 [label="G2", pos="1.3,3.6!"];
+  b1 [label="G2", pos="-3.9,-0.7!"]; b2 [label="G2", pos="-3.2,-2.6!"];
+  c1 [label="G2", pos="3.2,-2.6!"];  c2 [label="G2", pos="3.9,-0.7!"];
+
+  node [fillcolor="#E0F3EC", color="#0F6E56"];
+  e12a [label="G1", pos="-1.9,1.0!"];  e12b [label="G1", pos="-2.6,0.4!"];
+  e13a [label="G1", pos="1.9,1.0!"];   e13b [label="G1", pos="2.6,0.4!"];
+  e23a [label="G1", pos="-0.5,-2.1!"]; e23b [label="G1", pos="0.5,-2.1!"];
+
+  v1 -- v2 [penwidth=1.8, color="#333333"];
+  v1 -- v3 [penwidth=1.8, color="#333333"];
+  v2 -- v3 [penwidth=1.8, color="#333333"];
+
+  v1 -- a1; v1 -- a2; v2 -- b1; v2 -- b2; v3 -- c1; v3 -- c2;
+
+  v1 -- e12a; v2 -- e12a; v1 -- e12b; v2 -- e12b;
+  v1 -- e13a; v3 -- e13a; v1 -- e13b; v3 -- e13b;
+  v2 -- e23a; v3 -- e23a; v2 -- e23b; v3 -- e23b;
+}
+```
+
+#### Lower bound
+
+Now we can apply Lemma 3.2. Let $G_2 = H$ and $G_1 = J$. Then we know that every
+pair of vertices in $K_3$ must have a different color, so no two vertices can
+share a color. At minimum we need $3$ colors for a conflict-free coloring.
+
+We generalize, and by induction there exists $G_k$ for all $k$. Since the central
+graph is $K_k$ and every pair of vertices is adjacent, every such graph must have
+at least $k$ colors; in other words $\chi_{CF}(G_k) \ge k$.
+
+Note that ruling out $k$-colorings also rules out every smaller number of colors,
+since a conflict-free $k$-coloring may draw from $\{1,\dots,k\}$ without using
+them all.
+
+#### Upper bound
+
+It remains to show $\chi_{CF}(G_{k+1}) \le k+1$, which together with the lower
+bound gives $\chi_{CF}(G_{k+1}) = k+1$.
+
+**Claim.** Color the $k+1$ vertices of the core $K_{k+1}$ with distinct colors
+$1, \dots, k+1$ and leave *every other vertex uncolored*. This is a conflict-free
+$(k+1)$-coloring of $G_{k+1}$.
+
+**Proof.** There are three kinds of vertex to check.
+
+*Core vertices.* Let $v_i$ be a core vertex. The only colored vertices anywhere in
+$N[v_i]$ are the core vertices, and they carry pairwise distinct colors. So the
+color of $v_i$ occurs exactly once in $N[v_i]$, and $v_i$ is its own conflict-free
+neighbor.
+
+*Vertices in a vertex gadget.* Let $x$ lie in a copy of $G_k$ attached to $v_i$.
+By construction that copy is adjacent to no vertex of $G_{k+1}$ other than $v_i$,
+so $N[x] \subseteq V(\text{copy}) \cup \{v_i\}$. The copy is uncolored, so the
+color of $v_i$ occurs exactly once in $N[x]$, and $v_i$ is the conflict-free
+neighbor of $x$.
+
+*Vertices in an edge gadget.* Let $y$ lie in a copy of $G_{k-1}$ attached to the
+edge $v_i v_j$. Then $N[y] \subseteq V(\text{copy}) \cup \{v_i, v_j\}$, and the
+copy is uncolored, so exactly two colors appear in $N[y]$, each once. Either one
+serves as the conflict-free neighbor of $y$.
+
+Every vertex has a conflict-free neighbor, so the coloring is valid and
+$\chi_{CF}(G_{k+1}) \le k+1$. $\qquad\blacksquare$
+
+Combining, $\chi_{CF}(G_k) = k$ for all $k \ge 1$.
+
+Two things worth noticing about this coloring. First, it colors only $k+1$
+vertices out of the whole of $G_{k+1}$, which is why the same construction is
+useful when studying the conflict-free domination number $\gamma^k_{CF}$. Second,
+leaving the gadgets uncolored is exactly what makes the argument consistent with
+Lemma 3.2: the "sealed off" reasoning there applies only when the attachment
+vertex is uncolored, and here it is colored.
+
+#### Counting the vertices
+
+$$|G_1| = 1, \qquad |G_2| = 5, \qquad |G_3| = 3 + 3\big(2|G_2|\big) + 3\big(2|G_1|\big) = 3 + 30 + 6 = 39 .$$
+
+In general, the core contributes $k+1$ vertices, each of the $k+1$ core vertices
+carries $2|G_k|$, and each of the $\binom{k+1}{2}$ core edges carries
+$2|G_{k-1}|$. Since
+
+$$\binom{k+1}{2} = \frac{(k+1)!}{2!\,(k-1)!} = \frac{k(k+1)}{2},$$
+
+we get
+
+$$|G_{k+1}| \;=\; \underbrace{(k+1)}_{v \in K_{k+1}} \;+\; \underbrace{2(k+1)\,|G_k|}_{H \text{ graphs}} \;+\; \underbrace{k(k+1)\,|G_{k-1}|}_{J \text{ graphs}}$$
+
+and factoring out $(k+1)$,
+
+$$\boxed{\;|G_{k+1}| = (k+1)\Big(2|G_k| + k\,|G_{k-1}| + 1\Big).\;}$$
+
+Check: $|G_3| = 3(2\cdot 5 + 2\cdot 1 + 1) = 3 \cdot 13 = 39$ and
+$|G_4| = 4(2 \cdot 39 + 3 \cdot 5 + 1) = 4 \cdot 94 = 376$.
+
+#### Algorithmic bounds
+
+Every term of the bracket is positive, so $a_{k+1} \ge 2a_k$, and therefore
+
+$$a_k = \Omega\!\left(2^k\right).$$
+
+This is the bound stated in the paper, and it is all that is needed there. We can
+do better by keeping the factor in front: since $a_{k+1} \ge 2(k+1)a_k$,
+unrolling from $a_2 = 5$ gives
+
+$$a_k \;\ge\; 5 \prod_{j=3}^{k} 2j \;=\; 5 \cdot 2^{k-2} \cdot \frac{k!}{2},$$
+
+so $\log_2 a_k = \Omega(k \log k)$.
+
+
+The sequence is increasing, so $a_{k-1} \le a_k$, and also $1 \le a_k$. Hence
+
+$$a_{k+1} \;\le\; (k+1)\big(2a_k + k\,a_k + a_k\big) \;=\; (k+1)(k+3)\,a_k \;\le\; (k+3)^2 a_k .$$
+
+Unrolling from $a_1 = 1$,
+
+$$a_{k+1} \;\le\; \prod_{j=1}^{k} (j+3)^2 \;\le\; (k+3)^{2k},$$
+
+and taking logarithms,
+
+$$\log_2 a_{k+1} \;\le\; 2k \log_2 (k+3) \;=\; O(k \log k),$$
+
+so $a_k = \mathcal{O}\!\left(2^{k \log k}\right)$.
+
+##### Solving the recurrence
+
+First we rewrite our recurrence as a sequence:
+
+$$a_1 = 1, \qquad a_2 = 5, \qquad a_{k+1} = (k+1)\big(2a_k + k\,a_{k-1} + 1\big), \qquad k, a \in \mathbb{Z}^+ .$$
+
+The $(k+1)$ out front and the $k$ on the second term hide a Pell recurrence. We
+divide it out.
+
+#### Normalizing away the factorials
+
+Divide both sides by $(k+1)!$:
+
+$$\frac{a_{k+1}}{(k+1)!} \;=\; \frac{2a_k + k\,a_{k-1} + 1}{k!} .$$
+
+Let $b_k = \dfrac{a_k}{k!}$. The middle term simplifies because
+$\dfrac{k\,a_{k-1}}{k!} = \dfrac{a_{k-1}}{(k-1)!} = b_{k-1}$, so
+
+$$b_{k+1} \;=\; 2b_k + b_{k-1} + \frac{1}{k!} .$$
+
+Isolating the $1/k!$, what is left is exactly the **Pell recurrence**
+
+$$b_{k+1} = 2b_k + b_{k-1} .$$
+
+The seeds come from the graph: $b_1 = \dfrac{a_1}{1!} = 1$, where $a_1$ is the
+number of vertices in $G_1$, and $b_2 = \dfrac{a_2}{2!} = \dfrac{5}{2}$,
+referencing $K_{1,3}$ for $a_2$.
+
+#### The Pell recurrence
+
+$$P_n = 2P_{n-1} + P_{n-2}, \qquad P_0 = 0,\; P_1 = 1, \qquad \langle 0,1,2,5,12,29,70,\dots\rangle$$
+
+Set $P_n = r^n$, so $r^n = 2r^{n-1} + r^{n-2}$, giving $r^2 = 2r + 1$ and
+
+$$r^2 - 2r - 1 = 0, \qquad r = \frac{2 \pm \sqrt{4+4}}{2} = \frac{2 \pm \sqrt{8}}{2}, \qquad r = 1 + \sqrt{2},\; r = 1 - \sqrt{2}.$$
+
+The recurrence is linear, so
+
+$$P_n = A\big(1+\sqrt{2}\big)^n + B\big(1-\sqrt{2}\big)^n$$
+
+where $A$ and $B$ satisfy all values of the recurrence. From $P_0 = 0$ we get
+$A = -B$, and from $P_1 = 1$,
+
+$$1 = A\big(1+\sqrt2\big) - A\big(1-\sqrt2\big) = A\big(1 + \sqrt2 + \sqrt2 - 1\big) = A \cdot 2\sqrt2 ,$$
+
+so $A = \dfrac{1}{2\sqrt2}$ and $B = \dfrac{-1}{2\sqrt2}$, giving
+
+$$P_n = \frac{\big(1+\sqrt{2}\big)^n - \big(1-\sqrt{2}\big)^n}{2\sqrt{2}} .$$
+
+#### The homogeneous part
+
+Running the Pell recurrence forward from $b_1, b_2$:
+
+$$b_3 = 2b_2 + b_1, \qquad b_4 = 2b_3 + b_2 = 5b_2 + 2b_1, \qquad b_5 = 2b_4 + b_3 = 12b_2 + 5b_1 .$$
+
+The coefficients are Pell numbers, so we generalize:
+
+$$b_k \;=\; P_{k-1}\,b_2 + P_{k-2}\,b_1 \;=\; \frac{5}{2}P_{k-1} + P_{k-2} .$$
+
+#### The inhomogeneous part
+
+Our actual recurrence has $1/k!$ added, so
+
+$$b_3 = 6 + \frac{1}{2!} = 6.5, \qquad b_4 = 2b_3 + b_2 + \frac{1}{3!} = 5b_2 + 2b_1 + \frac{1}{3!} + 2\left(\frac{1}{2!}\right),$$
+
+$$b_5 = 2b_4 + b_3 + \frac{1}{4!} = 12b_2 + 5b_1 + 2\left(\frac{1}{3!}\right) + 5\left(\frac{1}{2!}\right) + \frac{1}{4!} .$$
+
+Each factorial creates its own Pell: a term $\dfrac{1}{j!}$ injected at step $j$
+propagates forward with Pell coefficients, contributing $\dfrac{P_{k-j}}{j!}$ to
+$b_k$.
+
+*Verification.* Let $k = 5$, $j = 2$. We have $\dfrac{P_3}{2!}$, where $P_3 = 5$,
+so $\dfrac{5}{2!}$ — which is the coefficient appearing on $\dfrac{1}{2!}$ in
+$b_5$ above.
+
+Accounting for every $j$, for some $k$:
+
+$$\sum_{j=2}^{k-1} \frac{P_{k-j}}{j!} .$$
+
+#### The closed form
+
+Solving for our altered Pell recurrence:
+
+$$b_k \;=\; \frac{5P_{k-1}}{2} + P_{k-2} + \sum_{j=2}^{k-1} \frac{P_{k-j}}{j!} .$$
+
+Remember that $b_k = \dfrac{a_k}{k!}$, and that $a_k$ is just our actual
+recurrence sequentialized, so
+
+$$\boxed{\;|G_k| \;=\; k!\left[\,P_{k-2} + \frac{5P_{k-1}}{2} + \sum_{j=2}^{k-1} \frac{P_{k-j}}{j!}\,\right]\;}$$
+
+with $P_n$ as above. Using the standard backward extension $P_{-1} = 1$, this is
+valid for all $k \ge 1$.
+
+*Check.* $k = 3$ gives $6\left[2 + \tfrac52 + \tfrac{P_1}{2!}\right] = 6(6.5) = 39$,
+and $k = 4$ gives $24\left[5 + \tfrac{25}{2} + \tfrac{P_2}{2!} + \tfrac{P_1}{3!}\right] = 24\left(\tfrac{47}{3}\right) = 376$,
+matching the direct counts. The sequence continues
+$1,\,5,\,39,\,376,\,4545,\,65826,\,1112461,\dots$
+
+#### Growth rate
+
+Write $\alpha = 1+\sqrt2$ and $\beta = 1-\sqrt2$, so
+
+$$P_n = \frac{\alpha^n - \beta^n}{2\sqrt2} .$$
+
+Since $|\beta| = \sqrt2 - 1 < 1$, the $\beta^n$ term vanishes and
+
+$$\lim_{n \to \infty} P_n = \lim_{n \to \infty} \frac{\alpha^n}{2\sqrt2}, \qquad\text{so}\qquad P_n = \Theta\!\left(\alpha^n\right) = \Theta\!\left(\big(1+\sqrt2\big)^n\right).$$
+
+For the sum, $P_{k-j} = \Theta\!\left(\alpha^{k-j}\right)$, so
+
+$$\sum_{j=2}^{k-1} \frac{P_{k-j}}{j!} \;=\; \Theta\!\left(\sum_{j=2}^{k-1} \frac{\alpha^{k}}{j!\,\alpha^{j}}\right) \;=\; \Theta\!\left(\alpha^{k} \sum_{j=2}^{k-1} \frac{1}{j!\,\alpha^{j}}\right),$$
+
+where $\sum_{j\ge2} \dfrac{1}{j!\,\alpha^{j}}$ converges — to $e^{1/\alpha} - 1 - \tfrac{1}{\alpha}$ —
+so the whole sum is $\Theta\!\left(\alpha^k\right)$. (The $j=2$ term alone is
+already $\Theta(\alpha^k)$, which gives the matching lower bound.)
+
+The remaining pieces $\dfrac{5P_{k-1}}{2}$ and $P_{k-2}$ are Pell recurrences
+multiplied by the constants $\dfrac{5}{2\alpha}$ and $\dfrac{1}{\alpha^2}$
+respectively, so they are both $\Theta\!\left(\alpha^k\right)$ as well.
+
+So $\dfrac{|G_k|}{k!} = \Theta\!\left(\big(1+\sqrt2\big)^k\right)$, and thus
+
+$$\boxed{\;|G_k| \;=\; \Theta\!\left(k!\,\big(1+\sqrt{2}\big)^{k}\right).\;}$$
+
+Because every piece has the same growth constant, the ratio actually converges
+rather than merely being bounded:
+
+$$\lim_{k\to\infty} \frac{|G_k|}{k!\,\alpha^k} \;=\; \frac{1}{2\sqrt2}\left(e^{\sqrt2 - 1} + \frac{1-\sqrt2}{2}\right) \;\approx\; 0.4617667 ,$$
+
+using $1/\alpha = \sqrt2 - 1$.
+
+#### Comparison with the paper
+
+The paper states only that $|G_k|$ is in $\Omega\!\left(2^k\right)$ and
+$\mathcal{O}\!\left(2^{k \log k}\right)$, for
+**fixed** $k$ the gadget has constant size, which is what makes the reduction in
+Lemma 3.4 run in polynomial time. The exact rate is consistent with both bounds,
+since $\log_2\!\left(k!\,\alpha^k\right) = \Theta(k \log k)$, but the closed form derived in this document along with it's growth raate are strictly
+sharper because we pin the base at $1 + \sqrt2 \approx 2.414$ 
+
+
+### Lemma 3.4 — The Reduction {#sec-lemma34}
+
+**Goal:** Show that $k$-coloring can be transformed into conflict-free $k$-coloring
+using a polynomial-time reduction. That is,
+
+$$k\text{-Coloring} \;\preccurlyeq_p\; \text{CF-Coloring}.$$
+
+Take a graph $G$, for which we want to check whether we can achieve a proper coloring
+with $k$ colors, where $k$ is fixed. We're going to try to construct a graph $G'$ by
+transforming $G$ such that
+
+$$G \text{ is properly } k\text{-colorable} \iff G' \text{ is CF } k\text{-colorable}.$$
+
+Achieving this would let us solve ordinary $k$-coloring if we can solve CF-coloring.
+
+#### The construction
+
+We can generalize the Lemma 3.3 results by taking some arbitrary graph $G$ that can be
+properly colored with $k$ colors.
+
+For every $v \in V(G)$, attach two copies of $G_k$ to each vertex, where $G_k$ is our
+gadget graph, adding an edge from $v$ to every vertex of both copies. For every edge
+$e = uv \in E(G)$, attach both $u$ and $v$ to two copies of $G_{k-1}$, adding an edge
+from $u$ and from $v$ to every vertex of both copies. Call the result $G'$.
+
+Note the difference: we are no longer working with complete graphs as the base of our
+construction, but we know this works for all $k$ colors. The construction needs both
+$G_k$ and $G_{k-1}$ to exist, so it requires $k \ge 2$.
+
+```{dot}
+//| label: fig-lemma34
+//| fig-cap: "The reduction applied to a single edge $uv$ of $G$. The gadgets play the roles of $H$ and $J$ from Lemma 3.2."
+//| fig-width: 5.2
+graph lemma34 {
+  graph [bgcolor="transparent", splines=true, nodesep=0.35, ranksep=1.1];
+  node  [fontname="Helvetica", fontsize=10, penwidth=1.1];
+  edge  [color="#7A7A7A", penwidth=1.0];
+
+  node [shape=box, style="rounded,filled", fillcolor="#EFE7F7", color="#6B4E9B"];
+  Hu1 [label="G_k"]; Hu2 [label="G_k"];
+  Hv1 [label="G_k"]; Hv2 [label="G_k"];
+
+  node [fillcolor="#E0F3EC", color="#0F6E56"];
+  J1 [label="G_(k-1)"]; J2 [label="G_(k-1)"];
+
+  node [shape=circle, style=filled, fixedsize=true, width=0.45, height=0.45];
+  u [label="u", fillcolor="#EF9F27", color="#854F0B"];
+  v [label="v", fillcolor="#5DCAA5", color="#0F6E56"];
+
+  { rank=same; u; v; }
+  { rank=same; Hu1; Hu2; J1; J2; Hv1; Hv2; }
+
+  u -- Hu1; u -- Hu2;
+  v -- Hv1; v -- Hv2;
+  u -- v [penwidth=1.8, color="#333333", label="  e", fontsize=10, fontcolor="#333333"];
+  u -- J1; u -- J2;
+  v -- J1; v -- J2;
+}
+```
+
+#### Direction 1: From $\chi_{P}$ of $G$ to $\chi_{CF}$ of $G'$
+
+Now color the subgraph $G$ of $G'$ as if it were being properly colored with $k$
+colors, and leave all the gadget vertices uncolored.
+
+All the vertices of every copy of $G_k$ are only adjacent to one colored vertex of $G$,
+namely the $v$ that copy hangs off, so the color of $v$ occurs exactly once in their
+closed neighborhoods and a conflict-free coloring is achieved.
+
+Vertices which share an edge (i.e. all $uv$) have different colors, because we colored
+$G$ properly, meaning that every vertex in all copies of $G_{k-1}$ adjacent to both $u$
+and $v$ sees exactly two colors, each once, and so is also conflict-free colorable.
+
+For the original vertices, because we are operating in the closed neighborhood $N[v]$,
+$v$ is its own conflict-free neighbor: no neighbor of $v$ in $G$ carries $v$'s color,
+since the coloring of $G$ is proper, and every gadget vertex in $N[v]$ is uncolored.
+
+So $G'$ can be conflict-free colored with $k$ colors.
+
+#### Direction 2: From a $\chi_{CF}$ of $G'$ to a $\chi_{P}$ of $G$
+
+Now we try to construct $G$ from some $G'$.
+
+Suppose $G'$ has some conflict-free $k$-coloring. Then all the vertices of the subgraph
+$G$ must be colored, per Lemma 3.2: each $v \in V(G)$ has two disjoint independent
+copies of $G_k$ in its open neighborhood, attached to nothing else, and
+$\chi_{CF}(G_k) = k$.
+
+The endpoints of every edge must differ, because $\chi(u) \neq \chi(v)$ by the second
+part of Lemma 3.2: the two copies of $G_{k-1}$ attached to $uv$ lie in
+$N(u) \cap N(v)$, are attached to nothing else, and satisfy
+$\chi_{CF}(G_{k-1}) = k-1$.
+
+A proper coloring of $G$ requires all vertices be colored and that adjacent vertices
+not share a color. We just proved both, so $G$ is properly colorable with $k$ colors.
+
+For all $k \ge 3$ we know proper coloring is NP-complete. Lemma 3.4 shows that
+
+$$\text{Proper } k\text{-Coloring} \;\preccurlyeq_p\; \text{Conflict-Free Coloring}.$$
+
+The reduction itself is valid for every $k \ge 2$; it only yields hardness from $k = 3$
+upward, because proper 2-coloring is in P (a graph is properly 2-colorable iff it is
+bipartite, which is decidable by breadth-first search).
+
+#### Verifying the Reduction is in P
+
+Note that the reduction is in polynomial time because we are considering a fixed $k$.
+This means $|G_k|$ and $|G_{k-1}|$ are constant. Since each vertex of $G$ carries two
+copies of $G_k$ and each edge carries two copies of $G_{k-1}$, label the per-vertex and
+per-edge costs
+
+$$C_1 := 2|G_k|, \qquad C_2 := 2|G_{k-1}|,$$
+
+both constants once $k$ is fixed. Writing $n = |V(G)|$ and $m = |E(G)|$, our count
+becomes
+
+$$|V(G')| \;=\; \underbrace{n}_{\text{original}} \;+\; \underbrace{2n|G_k|}_{\text{vertex gadgets}} \;+\; \underbrace{2m|G_{k-1}|}_{\text{edge gadgets}} \;=\; n\big(C_1 + 1\big) + C_2\,m,$$
+
+so $|V(G')| = \mathcal{O}(n + m)$.
+
+The edges come out the same way. Each vertex gadget contributes its own
+$|E(G_k)|$ internal edges plus $|G_k|$ join edges, and each edge gadget contributes
+$|E(G_{k-1})|$ internal edges plus $2|G_{k-1}|$ join edges, since the copy is joined to
+*both* endpoints. With $D_1 := 2\big(|G_k| + |E(G_k)|\big)$ and
+$D_2 := 2\big(2|G_{k-1}| + |E(G_{k-1})|\big)$,
+
+$$|E(G')| \;=\; m + D_1\,n + D_2\,m \;=\; \mathcal{O}(n+m).$$
+
+In other words we can construct our output graph $G'$ in linear time.
+
+*Check.* For $k = 3$ we have $|G_3| = 39$ with $69$ edges and $|G_2| = 5$ with $4$
+edges, giving $C_1 = 78$, $C_2 = 10$, $D_1 = 216$, $D_2 = 28$. Applying the reduction
+to $G = K_4$ (so $n = 4$, $m = 6$) predicts $4(79) + 60 = 376$ vertices and
+$6 + 216(4) + 28(6) = 1038$ edges — which is exactly $G_4$, as it must be, since $G_4$
+is this construction run on $K_4$.
+
+
+Alternatively, the fact that $k$ is fixed means that the number of vertices and edges
+we need to construct *per vertex and per edge of $G$* is fixed.
+
+Every vertex $v$ in the subgraph $G$ has $x = \deg_G(v)$ internal edges and
+$y = C_1$ edges to gadget vertices. The quantity $y$ is constant, but $x$ is not — it
+varies with $G$ and can be as large as $n-1$. So the two have to be accounted for
+separately.
+
+The gadget work at $v$ is constant: we instantiate $C_1$ new vertices, copy
+$2|E(G_k)|$ internal edges, and add $C_1$ join edges. That is some constant $C_1'$
+operations per vertex, so processing all $n$ vertices costs $C_1' n = \mathcal{O}(n)$.
+
+The internal edges are not paid for per vertex but per edge. We can apply the same
+logic to every edge: given $m$ edges with $C_2'$ operations per edge — copying the edge
+itself, instantiating $C_2$ vertices, and adding $D_2$ edges — the total is
+$C_2' m = \mathcal{O}(m)$. Equivalently, if one insists on charging internal edges to
+vertices, the handshake lemma gives $\sum_{v} \deg_G(v) = 2m$, which is $\mathcal{O}(m)$
+in aggregate even though no individual term is bounded.
+
+The total runtime is $\mathcal{O}(n + m)$. This checks out because every gadget we copy
+has constant size, so copying each gadget takes $\mathcal{O}(1)$, and there are $2n$
+gadget copies on vertices and $2m$ gadget copies on edges.
+
+::: {.callout-note appearance="simple"}
+**What "linear" is hiding.** The runtime is linear in $n$ and $m$, but the constant is
+$C_1 = 2|G_k|$, and from the closed form derived earlier,
+$|G_k| = \Theta\!\left(k!\,(1+\sqrt2)^k\right)$. So the reduction is linear for each
+*fixed* $k$ and catastrophic in $k$: already $C_1 = 752$ at $k = 4$. This is why the
+paper is careful to say $k$ is fixed, and why the result is a statement about
+$\text{CF }k\text{-Coloring}$ for each constant $k$ rather than about the problem with
+$k$ given as part of the input.
+:::
+
+#### Conclusion
+
+We know the reduction runs in polynomial time, so we know conflict-free coloring for a
+fixed $k$ is NP-hard. Checking a proposed conflict-free coloring can be done in
+polynomial time, for each vertex, tally the colors in $N[v]$ and look for a count of
+one, so the problem is in NP. Therefore
+
+$$\textbf{Conflict-Free Coloring is NP-complete for every fixed } k \ge 3.$$
+
+The cases $k = 1$ and $k = 2$ are not settled by this argument, since proper 1- and
+2-coloring are both in P. The paper handles them separately, by reduction from Positive
+Planar 1-in-3-SAT, and gets the stronger result that they are NP-complete even when the
+input is restricted to planar graphs.
+
+
+### Theorem 3.5 — A Sufficient Criterion {#sec-thm35}
+
+**Goal.** Prove that a graph with no $K_{k+2}$ minor and no $K^{-3}_{k+3}$ minor is
+conflict-free colorable with $k$ colors, and that the coloring can be found in
+polynomial time by *iterated elimination of distance-3 sets*.
+
+#### Notation for this section
+
+Everything below uses the following symbols, and nothing else. They are listed here
+because the proof runs three separate arguments that would otherwise reuse letters.
+
+| Symbol | Meaning |
+|---|---|
+| $\mathcal{P}(k)$ | the proposition being proved by induction on $k$ |
+| $\Delta(G)$ | the maximum degree of $G$ |
+| $C_\ell = t_1 t_2 \cdots t_\ell t_1$ | a cycle of length $\ell$, with vertices $t_i$ |
+| $T$ | a connected component of a forest, i.e. a tree |
+| $P = v_0 v_1 \cdots v_L$ | a longest path in $T$, with $L$ edges |
+| $z,\; Q,\; u$ | a vertex off $P$; a path from $z$ to $P$; the neighbor of $v_i$ on $Q$ |
+| $D$ | the set of vertices at pairwise distance $\ge 3$, colored in one round |
+| $N[D]$ | $\bigcup_{d \in D} N[d]$, the closed neighborhood of the whole set |
+| $W$ | the **unseen** set, $V(G) \setminus N[D]$ |
+| $s$ | the **seed**: the vertex the algorithm puts into $D$ first, chosen arbitrarily |
+| $U$ | an arbitrary set of unseen vertices, $U \subseteq W$ |
+| $R$ | a connected component of $G \setminus U$ |
+| $w,\; d,\; a,\; b$ | first vertex of $R$ to join $D$; a marked vertex outside $R$; and the two interior vertices of the 3-edge path $w\,a\,b\,d$ |
+| $y,\; f,\; x$ | an arbitrary vertex of $W$; an arbitrary vertex outside $W$; the vertex that $G \setminus W$ contracts to |
+
+
+#### The proposition
+
+Let $\mathcal{P}(k)$ be the statement, quantified over **all** graphs:
+
+> $\mathcal{P}(k)$: for every graph $X$, if $X$ has no $K_{k+2}$ minor and no
+> $K^{-3}_{k+3}$ minor, then iterated elimination of distance-3 sets colors $X$ with
+> $k$ colors.
+
+We prove $\mathcal{P}(1)$ outright, then show that
+$\mathcal{P}(k-1) \Rightarrow \mathcal{P}(k)$ for every $k \ge 2$.
+
+#### Base case: $k = 1$ {#sec-thm35-base}
+
+At $k = 1$ the forbidden minors are $K_{k+2} = K_3$ and
+$K^{-3}_{k+3} = K^{-3}_4$. Recall that $K^{-3}_n$ is $K_n$ with the three edges of one
+triangle deleted; deleting the triangle on $\{1,2,3\}$ from $K_4$ leaves the edges
+$14, 24, 34$, so
+
+$$K^{-3}_4 = K_{1,3}.$$
+
+::: {layout-ncol=3}
+
+```{dot}
+//| label: fig-t35-k3
+//| fig-cap: "$K_3$"
+//| fig-width: 1.7
+graph k3 {
+  layout=neato
+  bgcolor="transparent"
+  node [shape=circle, style=filled, fixedsize=true, width=0.3, height=0.3,
+        fontname="Helvetica", fontsize=10, penwidth=0.8,
+        color="#5F5E5A", fontcolor="#2C2C2A", fillcolor="#F1EFE8"]
+  edge [penwidth=0.8, color="#888780"]
+  a [pos="0.5,0.85!"]
+  b [pos="0,0!"]
+  c [pos="1,0!"]
+  a -- b; b -- c; c -- a
+}
+```
+
+```{dot}
+//| label: fig-t35-k4m3
+//| fig-cap: "$K_4$, triangle dashed"
+//| fig-width: 1.9
+graph k4m3 {
+  layout=neato
+  bgcolor="transparent"
+  node [shape=circle, style=filled, fixedsize=true, width=0.3, height=0.3,
+        fontname="Helvetica", fontsize=10, penwidth=0.8,
+        color="#5F5E5A", fontcolor="#2C2C2A", fillcolor="#F1EFE8"]
+  edge [penwidth=0.8, color="#888780"]
+  1 [pos="0,0.9!"]
+  2 [pos="0.9,0.9!"]
+  3 [pos="0.9,0!"]
+  4 [pos="0,0!", fillcolor="#F5C4B3", color="#993C1D"]
+  1 -- 2 [style=dashed, color="#E24B4A"]
+  2 -- 3 [style=dashed, color="#E24B4A"]
+  1 -- 3 [style=dashed, color="#E24B4A"]
+  4 -- 1; 4 -- 2; 4 -- 3
+}
+```
+
+```{dot}
+//| label: fig-t35-k13
+//| fig-cap: "$K^{-3}_4 = K_{1,3}$"
+//| fig-width: 1.9
+graph k13 {
+  layout=neato
+  bgcolor="transparent"
+  node [shape=circle, style=filled, fixedsize=true, width=0.3, height=0.3,
+        fontname="Helvetica", fontsize=10, penwidth=0.8,
+        color="#5F5E5A", fontcolor="#2C2C2A", fillcolor="#F1EFE8"]
+  edge [penwidth=0.8, color="#888780"]
+  4 [pos="0,0!", fillcolor="#F5C4B3", color="#993C1D"]
+  1 [pos="1,0.7!"]
+  2 [pos="1,0!"]
+  3 [pos="1,-0.7!"]
+  4 -- 1; 4 -- 2; 4 -- 3
+}
+```
+
+:::
+
+Deleting the dashed triangle from $K_4$ leaves exactly the three edges at vertex 4,
+which is the star $K_{1,3}$.
+
+Note that the two forbidden minors do exactly two different jobs: $K_3$ forbids cycles,
+and $K_{1,3}$ forbids branching. Together they force a disjoint union of paths, which we
+now prove in three steps.
+
+#### Step 1: $G$ has no $K_3$ minor, so it has no cycles
+
+**Proof by contradiction.** Suppose $G$ contains a cycle
+$C_\ell = t_1 t_2, t_2 t_3, \ldots, t_\ell t_1$. Because $G$ is a simple graph, the
+length of the cycle is $\ell \ge 3$.
+
+If $\ell = 3$, then $C_3 = K_3$ and we are done. If $\ell > 3$, then contract the edge
+$t_1 t_2$ into a new vertex $t^\ast$, so that $t^\ast$ inherits the neighbors of both
+and the cycle becomes $t^\ast t_3 \cdots t_\ell t^\ast$. We now have $\ell - 1$
+vertices. Do this $\ell - 3$ times, so that we have
+$\ell - (\ell - 3) = 3$ vertices left, meaning we have $C_3$.
+
+We produced this graph through deletions and contractions, so it is a minor of
+$C_\ell$ and thus a minor of $G$. In both cases $G$ has a $K_3$ subgraph or minor. By
+contradiction, $G$ does not contain any cycle, and because $G$ is acyclic it is a
+forest.
+
+*One detail worth checking:* no parallel edge appears during a contraction, since a
+parallel edge would require $t_1$ and $t_2$ to share a neighbor, forcing $\ell = 3$,
+which is excluded in this case.
+
+```{dot}
+//| label: fig-t35-contract-cycle
+//| fig-cap: "Contracting a cycle down to $K_3$. The highlighted edge is the one contracted at each step."
+//| fig-width: 5.8
+graph cyc {
+  layout=neato
+  bgcolor="transparent"
+  node [shape=circle, style=filled, fixedsize=true, width=0.26, height=0.26,
+        fontname="Helvetica", fontsize=9, penwidth=0.8,
+        color="#5F5E5A", fontcolor="#2C2C2A", fillcolor="#F1EFE8"]
+  edge [penwidth=0.8, color="#888780"]
+
+  a1 [pos="0,0.8!",    label="t1"]
+  a2 [pos="0.76,0.55!", label="t2"]
+  a3 [pos="0.76,-0.3!", label="t3"]
+  a4 [pos="0,-0.6!",    label="t4"]
+  a5 [pos="-0.55,0.1!", label="t5"]
+  a1 -- a2 [color="#D85A30", penwidth=1.6]
+  a2 -- a3; a3 -- a4; a4 -- a5; a5 -- a1
+
+  b1 [pos="2.4,0.55!", label="t*", fillcolor="#F5C4B3", color="#993C1D"]
+  b2 [pos="3.1,0.0!",  label="t3"]
+  b3 [pos="2.6,-0.6!", label="t4"]
+  b4 [pos="2.0,-0.1!", label="t5"]
+  b1 -- b2 [color="#D85A30", penwidth=1.6]
+  b2 -- b3; b3 -- b4; b4 -- b1
+
+  c1 [pos="4.9,0.55!", label="t**", fillcolor="#F5C4B3", color="#993C1D"]
+  c2 [pos="4.4,-0.4!", label="t4"]
+  c3 [pos="5.4,-0.4!", label="t5"]
+  c1 -- c2; c2 -- c3; c3 -- c1
+}
+```
+
+#### Step 2: $G$ has no $K_{1,3}$ minor, so $\Delta(G) \le 2$
+
+Suppose that $\Delta(G) \ge 3$. Then some vertex $v \in V(G)$ is adjacent to at least
+3 distinct neighbors $p, q, r$. Delete all other vertices besides $v, p, q$ and $r$.
+Delete any edges among $p, q, r$. We have 3 edges left, $vp$, $vq$ and $vr$, which is
+$K_{1,3}$. Because we only deleted edges and vertices, $K_{1,3}$ would be a minor of
+$G$. Thus, by contraposition, if $G$ has no $K_{1,3}$ minor then $\Delta(G) \le 2$.
+
+```{dot}
+//| label: fig-t35-deg3
+//| fig-cap: "A vertex of degree 3 yields $K_{1,3}$ by deletions alone: no contraction needed."
+//| fig-width: 5.2
+graph deg3 {
+  layout=neato
+  bgcolor="transparent"
+  node [shape=circle, style=filled, fixedsize=true, width=0.28, height=0.28,
+        fontname="Helvetica", fontsize=9, penwidth=0.8,
+        color="#5F5E5A", fontcolor="#2C2C2A", fillcolor="#F1EFE8"]
+  edge [penwidth=0.8, color="#888780"]
+
+  v [pos="0.7,0!",   label="v", fillcolor="#F5C4B3", color="#993C1D"]
+  p [pos="1.5,0.8!", label="p", fillcolor="#9FE1CB"]
+  q [pos="1.7,0!",   label="q", fillcolor="#9FE1CB"]
+  r [pos="1.5,-0.8!", label="r", fillcolor="#9FE1CB"]
+  e1 [pos="0,0.6!",  label=""]
+  e2 [pos="0,-0.6!", label=""]
+  v -- p; v -- q; v -- r
+  v -- e1 [style=dotted]; v -- e2 [style=dotted]
+  p -- q [style=dashed, color="#E24B4A"]
+  q -- r [style=dashed, color="#E24B4A"]
+
+  v2 [pos="3.6,0!",   label="v", fillcolor="#F5C4B3", color="#993C1D"]
+  p2 [pos="4.4,0.8!", label="p", fillcolor="#9FE1CB"]
+  q2 [pos="4.6,0!",   label="q", fillcolor="#9FE1CB"]
+  r2 [pos="4.4,-0.8!", label="r", fillcolor="#9FE1CB"]
+  v2 -- p2; v2 -- q2; v2 -- r2
+}
+```
+
+#### Step 3: a forest with $\Delta \le 2$ is a disjoint union of paths
+
+Each connected component of $G$ is a tree. Without loss of generality, pick one and
+label it $T$. Note that $\Delta(T) \le 2$. If $|V(T)| = 1$, then $T = P_1$. Assume
+$|V(T)| \ge 2$. $T$ is finite, so it must have some maximum path
+$P = v_0 v_1 \cdots v_L$.
+
+**Claim.** $V(P) = V(T)$.
+
+Suppose not. Since $T$ is connected, there must be some vertex $z \notin V(P)$ and a
+path $Q$ from $z$ to a vertex $v_i$ on $P$, where $v_i$ is the first vertex where $Q$
+and $P$ meet. There must be some $u$ adjacent to $v_i$ on $Q$, with $u \notin V(P)$.
+There are two cases.
+
+**Case 1: $v_i$ is an endpoint of $P$.** Say $v_i = v_L$; the argument for $v_0$ is
+symmetric. Then $v_0 v_1 \cdots v_L u$ is a path — no vertex repeats, since the $v_j$
+are distinct and $u \notin V(P)$ — with $|V(P)| + 1$ vertices. This path is longer
+than $P$, which is a contradiction to $P$ being the longest path.
+
+**Case 2: $v_i$ is a middle vertex of $P$.** Thus $v_i$ has at least two adjacent
+vertices $v_{i-1}$ and $v_{i+1}$, where $v_{i-1}, v_{i+1} \in V(P)$. $v_i$ is also
+adjacent to $u$. Thus $\deg(v_i) \ge 3$, which contradicts $\Delta(T) \le 2$.
+
+Both cases fail by way of contradiction, so $V(P) = V(T)$.
+
+**The edges.** Sharing vertices is not yet sharing edges, so this needs one more line.
+$P$ and $T$ have the same number of edges, specifically because $T$ is connected on
+$|V(P)|$ vertices, so it has exactly $|V(P)| - 1$ edges, and $P$ already supplies that
+many. The only way $T$ could have an extra edge is if that edge joined two vertices of
+$P$ at distance $\ge 2$ along $P$ — a **chord** — but a chord $v_i v_j$ with
+$j \ge i + 2$ closes the cycle $v_i v_{i+1} \cdots v_j v_i$, and $G$ is acyclic. So
+$E(T) = E(P)$ and $T = P$.
+
+Therefore every tree in the forest is a single path, which means $G$ is a union of
+disjoint paths.
+
+::: {layout-ncol=2}
+
+```{dot}
+//| label: fig-t35-case1
+//| fig-cap: "Case 1: $u$ attaches at an endpoint, so $P$ extends"
+//| fig-width: 2.9
+graph case1 {
+  layout=neato
+  bgcolor="transparent"
+  node [shape=circle, style=filled, fixedsize=true, width=0.32, height=0.32,
+        fontname="Helvetica", fontsize=8, penwidth=0.8,
+        color="#5F5E5A", fontcolor="#2C2C2A", fillcolor="#F1EFE8"]
+  edge [penwidth=0.8, color="#888780"]
+  x0 [pos="0,0!",   label="v0"]
+  x1 [pos="0.7,0!", label="v1"]
+  x2 [pos="1.4,0!", label="vL"]
+  xu [pos="2.1,0!", label="u", fillcolor="#F5C4B3", color="#993C1D"]
+  x0 -- x1; x1 -- x2
+  x2 -- xu [color="#D85A30", penwidth=1.4]
+}
+```
+
+```{dot}
+//| label: fig-t35-case2
+//| fig-cap: "Case 2: $u$ attaches in the middle, so $\\deg(v_i) \\ge 3$"
+//| fig-width: 2.9
+graph case2 {
+  layout=neato
+  bgcolor="transparent"
+  node [shape=circle, style=filled, fixedsize=true, width=0.40, height=0.40,
+        fontname="Helvetica", fontsize=8, penwidth=0.8,
+        color="#5F5E5A", fontcolor="#2C2C2A", fillcolor="#F1EFE8"]
+  edge [penwidth=0.8, color="#888780"]
+  y0 [pos="0,0!",    label="v0"]
+  y1 [pos="0.8,0!",  label="vi-1"]
+  y2 [pos="1.6,0!",  label="vi", fillcolor="#FAECE7", color="#993C1D"]
+  y3 [pos="2.4,0!",  label="vi+1"]
+  yu [pos="1.6,0.85!", label="u", fillcolor="#F5C4B3", color="#993C1D"]
+  y0 -- y1; y1 -- y2; y2 -- y3
+  y2 -- yu [color="#D85A30", penwidth=1.4]
+}
+```
+
+:::
+
+#### Step 4: Every path is conflict-free colorable with one color
+
+Now we prove that all paths are conflict-free colorable using 1 color. A path on $3n$
+vertices, $n \in \mathbb{Z}^+$, can be colored by coloring the middle vertex of every
+3 vertices. Then every vertex has a conflict-free neighbor: each colored vertex covers
+exactly its own block of three, and the blocks tile the path with no gaps and no
+overlaps.
+
+For a path on $3n - 1$ vertices, we can delete one endpoint from the $3n$ path, noting
+this vertex is uncolored, so we maintain our 1-CF-coloring. For $3n - 2$ we drop the
+remaining uncolored endpoint. Since
+
+$$3n \equiv 0, \qquad 3n-1 \equiv 2, \qquad 3n-2 \equiv 1 \pmod 3,$$
+
+and all integers are in $[0], [1], [2] \pmod 3$, all paths on any number of vertices
+can be CF-colored with 1 color.
+
+::: {.callout-note appearance="simple"}
+**The block view, and what it tells you.** With one color available the condition
+"some color occurs exactly once in $N[v]$" reduces to $|S \cap N[v]| = 1$ for every
+$v$, where $S$ is the colored set. Equivalently, the closed neighborhoods
+$\{N[y] : y \in S\}$ **tile** the path. An interior colored vertex covers a block of
+3; a colored vertex at an end covers a block of 2. So a valid coloring is exactly a
+decomposition of the path into consecutive blocks of size 3, with blocks of size 2
+allowed **only at the two ends**:
+
+$$2,\quad 3,\quad 4 = 2{+}2,\quad 5 = 3{+}2,\quad 6 = 3{+}3,\quad 7 = 2{+}3{+}2,\quad 8 = 3{+}3{+}2,\quad 9 = 3{+}3{+}3.$$
+
+Counting the 2-blocks by residue explains how many valid colorings a path has.
+$N \equiv 0$ needs zero 2-blocks; $N \equiv 1$ needs two, one at each end and both
+forced; $N \equiv 2$ needs exactly one, which may sit at either end. So the coloring is
+**unique** when $N \equiv 0, 1 \pmod 3$ and there are exactly **two** when
+$N \equiv 2$. Verified by exhaustive search for all $N \le 24$.
+
+Since the blocks tile, $|S| = \lceil N/3 \rceil$ for every valid coloring, which also
+computes the conflict-free domination number $\gamma^1_{CF}(P_N) = \lceil N/3 \rceil$.
+:::
+
+::: {layout-ncol=2}
+
+```{dot}
+//| label: fig-t35-blocks7
+//| fig-cap: "$P_7 = 2{+}3{+}2$. Solid edges lie inside a block; dashed edges cross between blocks."
+//| fig-width: 2.9
+graph b7 {
+  layout=neato
+  bgcolor="transparent"
+  node [shape=circle, style=filled, fixedsize=true, width=0.26, height=0.26,
+        fontname="Helvetica", fontsize=9, penwidth=0.8,
+        color="#5F5E5A", fontcolor="#2C2C2A", fillcolor="#F1EFE8"]
+  edge [penwidth=0.8, color="#888780"]
+  n1 [pos="0,0!",   label="1", fillcolor="#EF9F27", color="#854F0B"]
+  n2 [pos="0.5,0!", label="2"]
+  n3 [pos="1.0,0!", label="3"]
+  n4 [pos="1.5,0!", label="4", fillcolor="#EF9F27", color="#854F0B"]
+  n5 [pos="2.0,0!", label="5"]
+  n6 [pos="2.5,0!", label="6"]
+  n7 [pos="3.0,0!", label="7", fillcolor="#EF9F27", color="#854F0B"]
+  n1 -- n2 [penwidth=1.4]
+  n2 -- n3 [style=dashed]
+  n3 -- n4 [penwidth=1.4]
+  n4 -- n5 [penwidth=1.4]
+  n5 -- n6 [style=dashed]
+  n6 -- n7 [penwidth=1.4]
+}
+```
+
+```{dot}
+//| label: fig-t35-blocks8
+//| fig-cap: "$P_8 = 3{+}3{+}2$. The other valid coloring is $2{+}3{+}3$."
+//| fig-width: 2.9
+graph b8 {
+  layout=neato
+  bgcolor="transparent"
+  node [shape=circle, style=filled, fixedsize=true, width=0.26, height=0.26,
+        fontname="Helvetica", fontsize=9, penwidth=0.8,
+        color="#5F5E5A", fontcolor="#2C2C2A", fillcolor="#F1EFE8"]
+  edge [penwidth=0.8, color="#888780"]
+  m1 [pos="0,0!",   label="1"]
+  m2 [pos="0.5,0!", label="2", fillcolor="#EF9F27", color="#854F0B"]
+  m3 [pos="1.0,0!", label="3"]
+  m4 [pos="1.5,0!", label="4"]
+  m5 [pos="2.0,0!", label="5", fillcolor="#EF9F27", color="#854F0B"]
+  m6 [pos="2.5,0!", label="6"]
+  m7 [pos="3.0,0!", label="7"]
+  m8 [pos="3.5,0!", label="8", fillcolor="#EF9F27", color="#854F0B"]
+  m1 -- m2 [penwidth=1.4]
+  m2 -- m3 [penwidth=1.4]
+  m3 -- m4 [style=dashed]
+  m4 -- m5 [penwidth=1.4]
+  m5 -- m6 [penwidth=1.4]
+  m6 -- m7 [style=dashed]
+  m7 -- m8 [penwidth=1.4]
+}
+```
+
+:::
+
+This establishes $\mathcal{P}(1)$. $\qquad\blacksquare$
+
+#### Distance-3 sets {#sec-thm35-machinery}
+
+Now let's construct a set $D \subseteq V(G)$, where $D$ is the subset at pairwise
+distance at least 3 that uses color 1.
+
+**Disjoint neighborhoods.** Any pair of vertices in $D$ have disjoint neighborhoods,
+meaning no vertex in $N[v]$ is also in $N[y]$, so that
+
+$$\operatorname{dist}(v, y) \ge 3 \iff N[v] \cap N[y] = \emptyset .$$
+
+*Why:* a vertex in $N[v] \cap N[y]$ is adjacent-or-equal to both, giving a path from
+$v$ to $y$ of length at most 2; conversely a path of length at most 2 hands you such a
+vertex.
+
+$N[D]$ is the closed neighborhood of $D$: it includes $D$ and the neighborhoods of
+every vertex $d \in D$.
+
+```{dot}
+//| label: fig-t35-disjoint
+//| fig-cap: "Two vertices at distance 3 have disjoint closed neighborhoods, so every vertex in $N[D]$ sees exactly one member of $D$."
+//| fig-width: 4.6
+graph disj {
+  layout=neato
+  bgcolor="transparent"
+  node [shape=circle, style=filled, fixedsize=true, width=0.28, height=0.28,
+        fontname="Helvetica", fontsize=9, penwidth=0.8,
+        color="#5F5E5A", fontcolor="#2C2C2A", fillcolor="#F1EFE8"]
+  edge [penwidth=0.8, color="#888780"]
+  d1 [pos="0,0!",    label="v", fillcolor="#EF9F27", color="#854F0B"]
+  p1 [pos="0.8,0.55!", label=""]
+  p2 [pos="0.8,-0.55!", label=""]
+  m1 [pos="1.6,0!",  label=""]
+  p3 [pos="2.4,0.55!", label=""]
+  p4 [pos="2.4,-0.55!", label=""]
+  d2 [pos="3.2,0!",  label="y", fillcolor="#EF9F27", color="#854F0B"]
+  d1 -- p1; d1 -- p2; p1 -- m1; p2 -- m1
+  m1 -- p3; m1 -- p4; p3 -- d2; p4 -- d2
+}
+```
+
+**Inclusion-maximality.** $D$ is inclusion-maximal, meaning that if any vertex were
+added, then $D$ would not remain a distance-3 set. This means for any vertex
+$y \notin N[D]$, $y$ is less than distance 3 from some vertex in $D$, because
+otherwise it would be in $D$; and $y$ cannot be distance 1 from $D$, because then $y$
+would be in $D$'s closed neighborhood. So
+
+$$\operatorname{dist}(y, D) = 2 \quad \text{for every } y \in W .$$
+
+We call these vertices **unseen**, and write $W = V(G) \setminus N[D]$ for the set of
+them.
+
+**Cutset.** $U \subseteq V(G)$ is a cutset of $G$ if deleting $U$ leaves $G$
+disconnected.
+
+#### The algorithm
+
+We can use an algorithm to make $D$ inclusion-maximal and color the graph:
+
+1. Set $i \leftarrow 1$ and $\chi \leftarrow \emptyset$. Remove all isolated paths
+   from $G$ and set them aside. **While $G$ is not empty, do steps 2–5.**
+2. Set $D \leftarrow \emptyset$. For each disjoint component of $G$, pick an arbitrary
+   vertex and add it to $D$. Call the first such vertex the **seed**, $s$.
+3. While there is a vertex $y$ at distance $\ge 3$ from all vertices in $D$, pick some
+   $y$ *at distance exactly 3 from some vertex already in $D$* and add it to $D$.
+4. Assign $\chi(d) \leftarrow i$ for every $d \in D$, then set $i \leftarrow i + 1$.
+5. Remove $N[D]$ from $G$. This ensures we only have vertices at distance 2 from $D$
+   left. Then remove any newly isolated paths and set them aside.
+6. **After the loop ends:** color all the isolated paths that were set aside, using the
+   single color $i$, by the block decomposition of @sec-thm35-base.
+
+Every time the outer loop runs we add a new color. The first time, we color all the
+vertices in $D$ and leave all $v \in N(D)$ uncolored, so they satisfy conflict-free
+coloring. We then delete $N[D]$, so $D$ is empty again. We set any isolated paths to
+the side. Now $D$ is empty again, and we repeat until $G$ is empty.
+
+We assign a new color each time to ensure that a vertex in $N(D_1)$ which is also in
+$N(D_2)$ remains CF-colored. If $D_1$ and $D_2$ both had color $i$, then $i$ would not
+be unique.
+
+We assign one more color at the end for the isolated paths, so
+
+$$k \;=\; (\text{number of outer-loop runs}) \;+\; 1 .$$
+
+::: {.callout-warning appearance="simple"}
+**Why step 6 is outside the loop.** We must use a different color $i$ for each round. A covered vertex
+$v \in N[D_i] \setminus D_i$ can be adjacent to a path vertex stranded in the same
+round; that path vertex is not in $N[D_i]$, so it is a different vertex from $v$'s
+witness. If it received color $i$ too, then $v$ would see color $i$ twice and lose its
+witness — and $v$ has already been deleted, so nothing would catch it. Tested on
+random connected graphs, this variant produces an invalid coloring roughly 94% of the
+time. All stranded paths must share **one** color, assigned after the loop.
+:::
+
+```{dot}
+//| label: fig-t35-zones
+//| fig-cap: "One round partitions the graph into three zones. Only $D$ receives a color; the covered zone is deleted uncolored; the unseen zone is recursed on with fresh colors."
+//| fig-width: 5.4
+digraph zones {
+  bgcolor="transparent"
+  rankdir=LR
+  node [shape=box, style="rounded,filled", fontname="Helvetica", fontsize=10,
+        penwidth=0.9, height=0.55]
+  edge [color="#888780", penwidth=0.9, fontname="Helvetica", fontsize=9]
+  D  [label="D\ncolor 1", fillcolor="#FAECE7", color="#993C1D"]
+  C  [label="N[D] \\ D\nuncolored, deleted", fillcolor="#F1EFE8", color="#5F5E5A"]
+  Wz [label="W (unseen)\nrecurse, colors 2..k", fillcolor="#E1F5EE", color="#0F6E56"]
+  D -> C [label="  exactly one\l  D-neighbor\l"]
+  C -> Wz [label="  distance 2\l  from D\l"]
+}
+```
+
+#### Inductive step: $\mathcal{P}(k-1) \Rightarrow \mathcal{P}(k)$ {#sec-thm35-induction}
+
+We've proved $\mathcal{P}(1)$ as a base case. Suppose $\mathcal{P}(k-1)$ was true. Now
+assume that $G$ has no $K_{k+2}$ and no $K^{-3}_{k+3}$ minor. After one round we have
+$W$, which is an induced subgraph of $G$ and therefore a minor of $G$, so $W$ doesn't
+have $K_{k+2}$ or $K^{-3}_{k+3}$ as a minor.
+
+That inherited fact is the **wrong size**, however. Substituting $k-1$ for $k$ in
+$\mathcal{P}$'s hypothesis gives
+
+$$K_{(k-1)+2} = K_{k+1}, \qquad K^{-3}_{(k-1)+3} = K^{-3}_{k+2},$$
+
+so what $\mathcal{P}(k-1)$ demands of $W$ is that $W$ avoid the *smaller* pair. Nothing
+about being a subgraph makes the largest clique shrink, so this has to be proved. That
+is the work of the next two claims.
+
+#### Claim A: no set of unseen vertices is a cutset of $G$
+
+If $G$ is disconnected, iterated elimination of distance-3 sets works on all components
+separately, so we can assume $G$ to be connected.
+
+Let $U$ be a set of unseen vertices, i.e. $U \subseteq W$. For sake of contradiction,
+suppose $U$ is a cutset. Then deleting $U$ splits the graph. Pick a piece $R$ that does
+not contain the seed $s$. Such an $R$ must exist, because there are at least two pieces
+and the vertex $s$ can only be in one of them.
+
+**Every vertex of $R$ is at distance $\ge 3$ from every marked vertex outside $R$.**
+Any path from a vertex in $R$ to a colored vertex in $D$ must pass through $U$, by the
+definition of a cutset; then to a vertex in $N(D)$, the open neighborhood of $D$; and
+then to a vertex in $D$. So the path from $R$ to $D$ is at least a distance of 3.
+
+**So some vertex of $R$ has to be marked.** At least one vertex of $R$ is adjacent to
+$U$, and at least one vertex in $N(D)$ is adjacent to $U$; and any vertex at least 3
+away from every other marked vertex is exactly what step 3 of the algorithm adds to
+$D$. Since $D$ is inclusion-maximal, no vertex can sit at distance $\ge 3$ from all of
+$D$ — so if $R$ contained no marked vertex, every vertex of $R$ would be addable,
+contradicting maximality.
+
+**The contradiction.** Consider the iteration where the first vertex $w$ of $R$ is
+added to $D$. Moreover, $w$ was not the seed $s$ (the vertex arbitrarily chosen first by
+the algorithm), so by step 3, $w$ is exactly 3 away from some marked vertex; call it
+$d$. Let $a$ and $b$ be the two interior vertices on the 3-edge path from $w$ to $d$,
+so the path is $w\,a\,b\,d$ with $a \in U$ and $b \in N(D)$. Then $w$ is adjacent to
+$a$, and because $w$ is marked, $a \in N[D]$, so $a \notin U$. This is a
+contradiction, so $U$ cannot be a cutset. $\qquad\square$
+
+```{dot}
+//| label: fig-t35-cutset
+//| fig-cap: "The 3-edge path $w\\,a\\,b\\,d$ must cross $U$ at its first step, which puts the unseen vertex $a$ next to the marked vertex $w$."
+//| fig-width: 5.0
+graph cut {
+  layout=neato
+  bgcolor="transparent"
+  node [shape=circle, style=filled, fixedsize=true, width=0.3, height=0.3,
+        fontname="Helvetica", fontsize=10, penwidth=0.8,
+        color="#5F5E5A", fontcolor="#2C2C2A", fillcolor="#F1EFE8"]
+  edge [penwidth=0.8, color="#888780"]
+  w [pos="0,0!",   label="w", fillcolor="#EF9F27", color="#854F0B"]
+  a [pos="1.3,0!", label="a", fillcolor="#CECBF6"]
+  b [pos="2.6,0!", label="b"]
+  d [pos="3.9,0!", label="d", fillcolor="#EF9F27", color="#854F0B"]
+  lR [pos="0,0.55!",   shape=plaintext, style="", fixedsize=false, fontsize=9, label="R"]
+  lU [pos="1.3,0.55!", shape=plaintext, style="", fixedsize=false, fontsize=9, label="U (unseen)"]
+  lD [pos="3.3,0.55!", shape=plaintext, style="", fixedsize=false, fontsize=9, label="rest of G"]
+  w -- a [color="#D85A30", penwidth=1.6]
+  a -- b [color="#D85A30", penwidth=1.6]
+  b -- d [color="#D85A30", penwidth=1.6]
+}
+```
+
+This means that $W$, our set of unseen vertices, is also not a cutset since
+$W \supseteq U$. So $G \setminus W$ is connected.
+
+Take $U = W \setminus \{y\}$ for each $y \in W$. $U$ is still a set of unseen vertices,
+so it still isn't a cutset. Now take
+$G \setminus U = G \setminus (W \setminus \{y\})$, such that all unseen vertices but
+$y$ are removed. A path from $y$ to the seed $s$ still exists, and it doesn't pass any
+other vertex in $W$. Because $y$ is arbitrary, **every $y \in W$ has a neighbor outside
+of $W$.**
+
+#### Claim B: $W$ has no $K_{k+1}$ minor and no $K^{-3}_{k+2}$ minor
+
+Suppose $W$ has either forbidden minor. $W \neq V(G)$, since $D$ is non-empty and
+$W \cap D = \emptyset$, so pick any vertex $f \in V(G) \setminus W$.
+
+$G \setminus W$ is connected, so we can contract it into one vertex $x$. By Claim A,
+$x$ is adjacent to all vertices of $W$. Adding this universal vertex to either
+forbidden graph enlarges it by 1:
+
+$$K_{k+1} + x = K_{k+2}, \qquad K^{-3}_{k+2} + x = K^{-3}_{k+3} ,$$
+
+the second because $x$ joins to everything, so the deleted triangle stays deleted. But
+we assumed these two minors do not occur in $G$, so by contradiction their smaller
+counterparts cannot occur in $W$. $\qquad\square$
+
+```{dot}
+//| label: fig-t35-contract-x
+//| fig-cap: "Contracting $G \\setminus W$ to the single vertex $x$ turns a $K_{k+1}$ inside $W$ into a $K_{k+2}$ in $G$."
+//| fig-width: 5.0
+graph contr {
+  layout=neato
+  bgcolor="transparent"
+  node [shape=circle, style=filled, fixedsize=true, width=0.3, height=0.3,
+        fontname="Helvetica", fontsize=10, penwidth=0.8,
+        color="#5F5E5A", fontcolor="#2C2C2A", fillcolor="#E1F5EE"]
+  edge [penwidth=0.8, color="#888780"]
+
+  w1 [pos="0,0.9!"]
+  w2 [pos="0.9,0.9!"]
+  w3 [pos="0.9,0!"]
+  w1 -- w2; w2 -- w3; w3 -- w1
+  r1 [pos="0.45,-1.0!", label="", fillcolor="#F1EFE8"]
+  r2 [pos="-0.4,-0.5!", label="", fillcolor="#F1EFE8"]
+  r3 [pos="1.4,-0.6!",  label="", fillcolor="#F1EFE8"]
+  r1 -- r2; r1 -- r3
+  w1 -- r2; w2 -- r3; w3 -- r1
+
+  q1 [pos="3.2,0.9!"]
+  q2 [pos="4.1,0.9!"]
+  q3 [pos="4.1,0!"]
+  qx [pos="3.2,0!", label="x", fillcolor="#F5C4B3", color="#993C1D"]
+  q1 -- q2; q2 -- q3; q3 -- q1
+  qx -- q1; qx -- q2; qx -- q3
+}
+```
+
+#### Assembling the induction
+
+$W$ now satisfies $\mathcal{P}(k-1)$, and $D$ uses 1 color, so $G$ is conflict-free
+$k$-colorable by induction, for all $k$, when it doesn't contain $K_{k+2}$ and
+$K^{-3}_{k+3}$ minors.
+
+It remains to confirm that the combined coloring really is conflict-free, which the
+paper leaves implicit. There are two kinds of vertex.
+
+*Vertices in $N[D]$.* Each has exactly one neighbor in $D$, so color 1 occurs exactly
+once in its closed neighborhood. Every later color is $\ge 2$, and adding occurrences
+of other colors can never destroy the uniqueness of color 1.
+
+*Vertices in $W$.* Let $y \in W$ have conflict-free neighbor of color $c \ge 2$ from the
+recursive coloring of $W$. In $G$, the closed neighborhood $N[y]$ may be larger than it
+was inside $W$ — but $y$ is unseen, so $y$ has **no** neighbor in $D$, and every extra
+neighbor lies in $N[D] \setminus D$, which is uncolored. So no new colors enter $N[y]$
+at all, and $c$ is still unique.
+
+Every vertex has a conflict-free neighbor, so the coloring is valid and Theorem 3.5
+holds. $\qquad\blacksquare$
+
+::: {.callout-note appearance="simple"}
+**Both excluded minors are necessary.** $G_{k+1}$ from @sec-definitions contains a
+$K^{-3}_{k+3}$ minor but no $K_{k+2}$ minor, and $\chi_{CF}(G_{k+1}) = k+1 > k$. So
+excluding $K_{k+2}$ alone would make Theorem 3.5 false, and our own hierarchy is the
+counterexample. You can watch the induction stall: $G_3$ is series-parallel, hence
+$K_4$-minor-free, so it passes the "no $K_{k+2}$" half at $k=2$; but running one round
+leaves 33 unseen vertices containing a vertex of degree 3, hence a $K_{1,3}$ minor, so
+$W$ fails $\mathcal{P}(1)$ and the recursion cannot bottom out.
+
+**The bound is an upper bound only.** The algorithm's output depends on the arbitrary
+choices in steps 2 and 3, and can exceed $\chi_{CF}(G)$. On the graph with edges
+$13, 15, 17, 24, 25, 28, 34, 48, 58, 67, 78$ the algorithm uses 3 colors while
+$\chi_{CF} = 2$. This is unavoidable: deciding $\chi_{CF}(G) \le 1$ is NP-complete even
+for planar graphs, so no polynomial-time heuristic can be exact.
+:::
+
+### Corollary 3.6 — The Conflict-Free Hadwiger Theorem {#sec-cor36}
+
+**Statement.** All graphs that do not have $K_{k+1}$ as a minor are conflict-free
+$k$-colorable. That is, $\chi_{CF}(G) \le k$ whenever $G$ has no $K_{k+1}$ minor.
+
+**Proof.** Assume $G$ has no $K_{k+1}$ minor. We check both hypotheses of
+Theorem 3.5.
+
+*No $K_{k+2}$ minor.* $K_{k+1}$ is a subgraph of $K_{k+2}$, obtained by deleting one
+vertex, and every subgraph is a minor. Minor containment is transitive, so if
+$K_{k+2}$ were a minor of $G$, then $K_{k+1}$ would be too, contradicting the
+assumption.
+
+*No $K^{-3}_{k+3}$ minor.* Write $K^{-3}_{k+3}$ on the vertex set
+$\{\alpha, \beta, \gamma\} \cup F$, where the triangle $\alpha\beta\gamma$ has been
+deleted and $|F| = k$. Then $F$ is a clique, every vertex of $F$ is adjacent to each of
+$\alpha, \beta, \gamma$, and only $\alpha, \beta, \gamma$ are pairwise non-adjacent.
+Delete $\beta$ and $\gamma$. What survives is $F \cup \{\alpha\}$: exactly $k+1$
+vertices, pairwise adjacent, so $K_{k+1}$. Hence $K_{k+1}$ is a minor of
+$K^{-3}_{k+3}$, and the same transitivity argument applies.
+
+Both hypotheses hold, so Theorem 3.5 gives a conflict-free $k$-coloring of $G$, and it
+is computable in polynomial time. $\qquad\blacksquare$
+
+```{dot}
+//| label: fig-c36-containment
+//| fig-cap: "$K_{k+1}$ is a minor of $K^{-3}_{k+3}$: delete two of the three independent vertices. Shown for $k = 2$, where $K^{-3}_5$ reduces to $K_3$."
+//| fig-width: 5.0
+graph cor36 {
+  layout=neato
+  bgcolor="transparent"
+  node [shape=circle, style=filled, fixedsize=true, width=0.3, height=0.3,
+        fontname="Helvetica", fontsize=10, penwidth=0.8,
+        color="#5F5E5A", fontcolor="#2C2C2A", fillcolor="#F1EFE8"]
+  edge [penwidth=0.8, color="#888780"]
+
+  A [pos="0,1.0!",  label="a", fillcolor="#9FE1CB"]
+  B [pos="0,0.2!",  label="b", fillcolor="#FCEBEB", color="#A32D2D"]
+  C [pos="0,-0.6!", label="g", fillcolor="#FCEBEB", color="#A32D2D"]
+  F1 [pos="1.3,0.7!",  label="f1", fillcolor="#CECBF6"]
+  F2 [pos="1.3,-0.3!", label="f2", fillcolor="#CECBF6"]
+  F1 -- F2
+  A -- F1; A -- F2; B -- F1; B -- F2; C -- F1; C -- F2
+
+  A2 [pos="3.6,0.55!", label="a", fillcolor="#9FE1CB"]
+  G1 [pos="4.5,1.0!",  label="f1", fillcolor="#CECBF6"]
+  G2 [pos="4.5,0.1!",  label="f2", fillcolor="#CECBF6"]
+  G1 -- G2; A2 -- G1; A2 -- G2
+}
+```
+
+::: {.callout-note appearance="simple"}
+**Analogue to Hadwiger's.** The proper-coloring version of this statement
+— if $G$ has no $K_{k+1}$ minor then $\chi_P(G) \le k$ — is **Hadwiger's Conjecture**,
+open since 1943 and still unresolved for $k \ge 6$. The conflict-free version is a
+theorem with a page of proof. Given the inequality $\chi_{CF}(G) \le \chi_P(G)$ from
+@sec-definitions, this is a precise sense in which conflict-free coloring is the easier
+problem: the hard conjecture becomes provable.
+
+Theorem 3.5 is strictly stronger than this corollary, since its hypothesis excludes a
+larger clique and therefore applies to more graphs. Corollary 4.4 of the paper draws
+the planar results from Theorem 3.5 the same way: planar graphs have no $K_5$ minor,
+and $K^{-3}_6$ contains $K_{3,3}$, so planar graphs have no $K^{-3}_6$ minor either —
+giving $\chi_{CF} \le 3$ for planar graphs. Excluding $K_4$ and
+$K^{-3}_5 \supseteq K_{2,3}$ likewise gives $\chi_{CF} \le 2$ for outerplanar graphs.
+:::
+
+## Hardness {#sec-hardness}
+
+*TODO: What's being reduced from, and why that source problem. Reductions read
+as arbitrary until you see what structural feature is being exploited.*
+
+*TODO: The gadget. Draw it. Then state what it enforces and verify both
+directions of the correctness argument separately — most write-ups compress
+these into one paragraph and lose the reader.*
+
+## Outerplanar graphs {#sec-outerplanar}
+
+*TODO: Why outerplanar is the tractable case. What does the structure buy you
+that general graphs don't?*
+
+*TODO: The dynamic programming pipeline. What's the state, what's the
+recurrence, what's the order of evaluation, what's the runtime. A worked
+example on a small outerplanar graph would carry this section.*
+
+## Loose ends {#sec-loose-ends}
+
+::: {.callout-warning appearance="simple"}
+*TODO: Places where you're unsure, steps you couldn't fully reconstruct, open
+questions the paper raises. Keeping this section visible is a feature — it
+tells readers where the hard parts are and it's honest about the limits of the
+reconstruction.*
+:::
+
+## References {#sec-references}
+
+::: {#refs}
+:::

@@ -1,0 +1,24 @@
+# LaTeX intermediate files
+*.aux
+*.log
+*.out
+*.toc
+*.lof
+*.lot
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+*.bbl
+*.blg
+*.bcf
+*.run.xml
+
+# Quarto
+/.quarto/
+_site/
+*_files/
+*_cache/
+
+# OS junk
+.DS_Store
+Thumbs.db
