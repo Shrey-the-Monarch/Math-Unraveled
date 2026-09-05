@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Shrey Shah">
-<meta name="dcterms.date" content="2026-09-03">
+<meta name="dcterms.date" content="2026-09-05">
 
 <title>Conflict-Free Coloring of Graphs</title>
 <style>
@@ -121,10 +121,8 @@ window.Quarto = {
   <li><a href="#sec-thm35" id="toc-sec-thm35" class="nav-link" data-scroll-target="#sec-thm35"><span class="header-section-number">4.4</span> Theorem 3.5 — A Sufficient Criterion</a></li>
   <li><a href="#sec-cor36" id="toc-sec-cor36" class="nav-link" data-scroll-target="#sec-cor36"><span class="header-section-number">4.5</span> Corollary 3.6 — The Conflict-Free Hadwiger Theorem</a></li>
   </ul></li>
-  <li><a href="#sec-hardness" id="toc-sec-hardness" class="nav-link" data-scroll-target="#sec-hardness"><span class="header-section-number">5</span> Hardness</a></li>
-  <li><a href="#sec-outerplanar" id="toc-sec-outerplanar" class="nav-link" data-scroll-target="#sec-outerplanar"><span class="header-section-number">6</span> Outerplanar graphs</a></li>
-  <li><a href="#sec-loose-ends" id="toc-sec-loose-ends" class="nav-link" data-scroll-target="#sec-loose-ends"><span class="header-section-number">7</span> Loose ends</a></li>
-  <li><a href="#sec-references" id="toc-sec-references" class="nav-link" data-scroll-target="#sec-references"><span class="header-section-number">8</span> References</a></li>
+  <li><a href="#sec-loose-ends" id="toc-sec-loose-ends" class="nav-link" data-scroll-target="#sec-loose-ends"><span class="header-section-number">5</span> Loose ends</a></li>
+  <li><a href="#sec-references" id="toc-sec-references" class="nav-link" data-scroll-target="#sec-references"><span class="header-section-number">6</span> References</a></li>
   </ul>
 <div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="index.pdf"><i class="bi bi-file-pdf"></i>PDF</a></li></ul></div></nav>
 </div>
@@ -150,7 +148,7 @@ window.Quarto = {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">September 3, 2026</p>
+      <p class="date">September 5, 2026</p>
     </div>
   </div>
   
@@ -175,8 +173,8 @@ window.Quarto = {
 </div>
 </div>
 <p>There are numerous reasons we’d want to establish whether a conflict free-coloring was possible, and more frequently how to achieve it with as few colors as possible. The “colors” being referred to are identifiers, and can represent anything from a unique frequency to a data signature like a clearance level. Therefore, finding out how to achieve conflict free coloring with the minimum number of colors, can prove useful in a slew of optimization problems.</p>
-<p>A key example would be in the case of smart phones and cell towers. Cities and public planners want to establish as few cell towers as possible (because of how notoriously costly they are), while ensuring that there is no location, lacking a signal. Cell towers have a limited number of frequencies they can use establish network access with your phone. If no cell tower in range uses a unique frequency, then the cell phone will receive multiple frequencies of the same kind at the same time, and these signals will collide, causing interference, and preventing network connection. This use of frequencies extends to almost every form of wireless communication, including in drone swarms, where robots have to communicate their positions with at least one other nearby drone to prevent collision.</p>
-<p>The paper, “Conflict-Free Coloring of Graphs”, by Abel et al.&nbsp;establishes that if a given graph does not contain a complete minor of size <span class="math inline">\(k + 1\)</span> (where a minor is a graph obtained from the initial graph by contracting or deleting an edge or edges, and/or deleting isolated vertices), then the graph is conflict free colorable with k colors for closed neighborhoods. The paper further proves that all planar graphs (which are graphs that can be arranged such that no two edges overlap), are always conflict free-colorable with 3 colors, though less than 3 colors may suffice. The paper also establishes computational complexity for various methods of conflict free coloring with specific constraints. The paper tackles the algorithmic complexity of minimizing the number of colors and the number of colored vertices, for planar graphs (and variants of planar graphs). They finally establish that for open neighborhoods, every planar <strong>bipartite</strong> graph can be conflict free colored with 4 or fewer colors, and every planar graph has a conflict-free coloring with at most 8 colors.</p>
+<p>A key example would be in the case of smart phones and cell towers. Cities and public planners want to establish as few cell towers as possible (because of how notoriously costly they are), while ensuring that there is no location, lacking a signal. Cell towers have a limited number of frequencies they can use establish network access with your phone. If no cell tower in range uses a unique frequency, then the cell phone will receive multiple frequencies of the same kind at the same time, and these signals will collide, causing interference, and preventing network connection. This use of frequencies extends to almost every form of wireless communication, including in drone swarms, where robots have to communicate their positions with at least one other nearby drone to prevent collision <span class="citation" data-cites="even2003">(<a href="#ref-even2003" role="doc-biblioref">Even et al. 2003</a>)</span>.</p>
+<p>The paper, “Conflict-Free Coloring of Graphs”, by Abel et al. <span class="citation" data-cites="abel2018">(<a href="#ref-abel2018" role="doc-biblioref">Abel et al. 2018</a>)</span> establishes that if a given graph does not contain a complete minor of size <span class="math inline">\(k + 1\)</span> (where a minor is a graph obtained from the initial graph by contracting or deleting an edge or edges, and/or deleting isolated vertices), then the graph is conflict free colorable with k colors for closed neighborhoods. The paper further proves that all planar graphs (which are graphs that can be arranged such that no two edges overlap), are always conflict free-colorable with 3 colors, though less than 3 colors may suffice <span class="citation" data-cites="abel2017">(<a href="#ref-abel2017" role="doc-biblioref">Abel et al. 2017</a>)</span>. The paper also establishes computational complexity for various methods of conflict free coloring with specific constraints. The paper tackles the algorithmic complexity of minimizing the number of colors and the number of colored vertices, for planar graphs (and variants of planar graphs). They finally establish that for open neighborhoods, every planar <strong>bipartite</strong> graph can be conflict free colored with 4 or fewer colors, and every planar graph has a conflict-free coloring with at most 8 colors.</p>
 <section id="what-this-document-adds" class="level3" data-number="1.1">
 <h3 data-number="1.1" class="anchored" data-anchor-id="what-this-document-adds"><span class="header-section-number">1.1</span> What this document adds</h3>
 <p>If any of the above purposes of the paper seemed esoteric or complex, that’s completely normal. The purpose of this document is to simplify this research while exploring it further. This document aims to reconstruct the findings of the paper by more extensively defining key terms, adding more vizualizations (especially because they can help abstract thinking about graphs), expanding upon the lemmas, subproofs, and algorithms found throughout the paper.</p>
@@ -184,7 +182,7 @@ window.Quarto = {
 </section>
 <section id="sec-prereqs" class="level2" data-number="2">
 <h2 data-number="2" class="anchored" data-anchor-id="sec-prereqs"><span class="header-section-number">2</span> What you need to know first</h2>
-<p>You will need a working knowledge of very elementary graph theory to understand the concepts. If you need a refresher, this <a href="https://thepolymathmind.blogspot.com/2026/08/introduction-to-graph-theory.html">blog</a> has a quick and holistic one.</p>
+<p>You will need a working knowledge of very elementary graph theory to understand the concepts. If you need a refresher, this <a href="https://thepolymathmind.blogspot.com/2026/08/introduction-to-graph-theory.html">blog</a> has a quick and holistic one <span class="citation" data-cites="shah2026graphtheory">(<a href="#ref-shah2026graphtheory" role="doc-biblioref">Shah 2026</a>)</span>.</p>
 <p><strong>Open and Closed Neighborhoods:</strong> An open neighborhood of a vertex v is the set of vertices adjacent to v. A closed neighborhood of a vertex v is the set of vertices adjacent to v, and the vertex v itself. Both kinds of neighborhoods are used throughout the paper, and the paper generally splits it’s various proofs by which type of neighborhood is being used.</p>
 <div class="quarto-layout-panel" data-layout-ncol="2">
 <div class="quarto-layout-row">
@@ -748,7 +746,7 @@ Figure&nbsp;8: <span class="math inline">\(G / e\)</span>, loops and parallel ed
 </div>
 </div>
 <p>Identifying <span class="math inline">\(u\)</span> and <span class="math inline">\(v\)</span> produces a multigraph, with a loop where <span class="math inline">\(e\)</span> used to be and a parallel pair for each common neighbor; deleting those recovers a simple graph.</p>
-<p><strong>Wagner-Kurotawski Theorem:</strong> These are two separate theorems, both of which establish that a graph is planar if and and only if it does not contain a <span class="math inline">\(K_5\)</span> or <span class="math inline">\(K_{3,3}\)</span> minor, and does not contain a subgraph that is a subdivision of <span class="math inline">\(K_5\)</span> or <span class="math inline">\(K_{3,3}\)</span>. <span class="math inline">\(K_{3,3}\)</span> is shown by <a href="#fig-k33" class="quarto-xref">Figure&nbsp;4</a> and <span class="math inline">\(K_{5}\)</span>, the complete graph on k vertices, is drawn below for reference, remember a planar graph is one that can rearranged on a flat surface such that no edges cross over each other.</p>
+<p><strong>Wagner-Kurotawski Theorem <span class="citation" data-cites="wagner1937 kuratowski1930">(<a href="#ref-wagner1937" role="doc-biblioref">Wagner 1937</a>; <a href="#ref-kuratowski1930" role="doc-biblioref">Kuratowski 1930</a>)</span>:</strong> These are two separate theorems, both of which establish that a graph is planar if and and only if it does not contain a <span class="math inline">\(K_5\)</span> or <span class="math inline">\(K_{3,3}\)</span> minor, and does not contain a subgraph that is a subdivision of <span class="math inline">\(K_5\)</span> or <span class="math inline">\(K_{3,3}\)</span>. <span class="math inline">\(K_{3,3}\)</span> is shown by <a href="#fig-k33" class="quarto-xref">Figure&nbsp;4</a> and <span class="math inline">\(K_{5}\)</span>, the complete graph on k vertices, is drawn below for reference, remember a planar graph is one that can rearranged on a flat surface such that no edges cross over each other.</p>
 <div class="cell" data-fig-width="2.2" data-layout-align="default">
 <div class="cell-output-display">
 <div id="fig-k5" class="quarto-float quarto-figure quarto-figure-center anchored">
@@ -4002,40 +4000,50 @@ Figure&nbsp;40: <span class="math inline">\(K_{k+1}\)</span> is a minor of <span
 <i class="callout-icon"></i>
 </div>
 <div class="callout-body-container">
-<p><strong>Analogue to Hadwiger’s.</strong> The proper-coloring version of this statement — if <span class="math inline">\(G\)</span> has no <span class="math inline">\(K_{k+1}\)</span> minor then <span class="math inline">\(\chi_P(G) \le k\)</span> — is <strong>Hadwiger’s Conjecture</strong>, open since 1943 and still unresolved for <span class="math inline">\(k \ge 6\)</span>. The conflict-free version is a theorem with a page of proof. Given the inequality <span class="math inline">\(\chi_{CF}(G) \le \chi_P(G)\)</span> from <a href="#sec-definitions" class="quarto-xref">Section&nbsp;3</a>, this is a precise sense in which conflict-free coloring is the easier problem: the hard conjecture becomes provable.</p>
+<p><strong>Analogue to Hadwiger’s.</strong> The proper-coloring version of this statement — if <span class="math inline">\(G\)</span> has no <span class="math inline">\(K_{k+1}\)</span> minor then <span class="math inline">\(\chi_P(G) \le k\)</span> — is <strong>Hadwiger’s Conjecture</strong>, open since 1943 and still unresolved for <span class="math inline">\(k \ge 6\)</span> <span class="citation" data-cites="hadwiger1943">(<a href="#ref-hadwiger1943" role="doc-biblioref">Hadwiger 1943</a>)</span>. The conflict-free version is a theorem with a page of proof. Given the inequality <span class="math inline">\(\chi_{CF}(G) \le \chi_P(G)\)</span> from <a href="#sec-definitions" class="quarto-xref">Section&nbsp;3</a>, this is a precise sense in which conflict-free coloring is the easier problem: the hard conjecture becomes provable.</p>
 <p>Theorem 3.5 is strictly stronger than this corollary, since its hypothesis excludes a larger clique and therefore applies to more graphs. Corollary 4.4 of the paper draws the planar results from Theorem 3.5 the same way: planar graphs have no <span class="math inline">\(K_5\)</span> minor, and <span class="math inline">\(K^{-3}_6\)</span> contains <span class="math inline">\(K_{3,3}\)</span>, so planar graphs have no <span class="math inline">\(K^{-3}_6\)</span> minor either — giving <span class="math inline">\(\chi_{CF} \le 3\)</span> for planar graphs. Excluding <span class="math inline">\(K_4\)</span> and <span class="math inline">\(K^{-3}_5 \supseteq K_{2,3}\)</span> likewise gives <span class="math inline">\(\chi_{CF} \le 2\)</span> for outerplanar graphs.</p>
 </div>
 </div>
 </div>
 </section>
 </section>
-<section id="sec-hardness" class="level2" data-number="5">
-<h2 data-number="5" class="anchored" data-anchor-id="sec-hardness"><span class="header-section-number">5</span> Hardness</h2>
-<p><em>TODO: What’s being reduced from, and why that source problem. Reductions read as arbitrary until you see what structural feature is being exploited.</em></p>
-<p><em>TODO: The gadget. Draw it. Then state what it enforces and verify both directions of the correctness argument separately — most write-ups compress these into one paragraph and lose the reader.</em></p>
-</section>
-<section id="sec-outerplanar" class="level2" data-number="6">
-<h2 data-number="6" class="anchored" data-anchor-id="sec-outerplanar"><span class="header-section-number">6</span> Outerplanar graphs</h2>
-<p><em>TODO: Why outerplanar is the tractable case. What does the structure buy you that general graphs don’t?</em></p>
-<p><em>TODO: The dynamic programming pipeline. What’s the state, what’s the recurrence, what’s the order of evaluation, what’s the runtime. A worked example on a small outerplanar graph would carry this section.</em></p>
-</section>
-<section id="sec-loose-ends" class="level2" data-number="7">
-<h2 data-number="7" class="anchored" data-anchor-id="sec-loose-ends"><span class="header-section-number">7</span> Loose ends</h2>
+<section id="sec-loose-ends" class="level2" data-number="5">
+<h2 data-number="5" class="anchored" data-anchor-id="sec-loose-ends"><span class="header-section-number">5</span> Loose ends</h2>
 <div class="callout callout-style-simple callout-warning">
 <div class="callout-body d-flex">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-body-container">
-<p><em>TODO: Places where you’re unsure, steps you couldn’t fully reconstruct, open questions the paper raises. Keeping this section visible is a feature — it tells readers where the hard parts are and it’s honest about the limits of the reconstruction.</em></p>
+<p>This expository project only covers the conflict-free coloring aspect and does not delve into the specific hardness of outerplanar graphs, and the NP-completeness of conflict-free coloring in planar graphs. The original paper contains additional results and proofs that are not included here. More work has been done, specifically in finding an example that shows a graph without the <span class="math inline">\(K^{-3}_{k+3}\)</span> minor that is not colorable because it has the other minor.</p>
 </div>
 </div>
 </div>
 </section>
-<section id="sec-references" class="level2" data-number="8">
-<h2 data-number="8" class="anchored" data-anchor-id="sec-references"><span class="header-section-number">8</span> References</h2>
-<div id="refs" role="list">
-
+<section id="sec-references" class="level2" data-number="6">
+<h2 data-number="6" class="anchored" data-anchor-id="sec-references"><span class="header-section-number">6</span> References</h2>
+<div id="refs" class="references csl-bib-body hanging-indent" role="list">
+<div id="ref-abel2017" class="csl-entry" role="listitem">
+Abel, Zachary, Victor Alvarez, Erik D. Demaine, et al. 2017. <span>“Three Colors Suffice: Conflict-Free Coloring of Planar Graphs.”</span> <em>Proceedings of the 28th Annual ACM-SIAM Symposium on Discrete Algorithms (SODA)</em>, 1951–63.
+</div>
+<div id="ref-abel2018" class="csl-entry" role="listitem">
+Abel, Zachary, Victor Alvarez, Erik D. Demaine, et al. 2018. <span>“Conflict-Free Coloring of Graphs.”</span> <em>SIAM Journal on Discrete Mathematics</em> 32 (4): 2675–702. <a href="https://doi.org/10.1137/17M1146579">https://doi.org/10.1137/17M1146579</a>.
+</div>
+<div id="ref-even2003" class="csl-entry" role="listitem">
+Even, Guy, Zvi Lotker, Dana Ron, and Shakhar Smorodinsky. 2003. <span>“Conflict-Free Colorings of Simple Geometric Regions with Applications to Frequency Assignment in Cellular Networks.”</span> <em>SIAM Journal on Computing</em> 33 (1): 94–136.
+</div>
+<div id="ref-hadwiger1943" class="csl-entry" role="listitem">
+Hadwiger, Hugo. 1943. <span>“<span>Ü</span>ber Eine Klassifikation Der Streckenkomplexe.”</span> <em>Vierteljahrsschrift Der Naturforschenden Gesellschaft in Z<span>ü</span>rich</em> 88: 133–42.
+</div>
+<div id="ref-kuratowski1930" class="csl-entry" role="listitem">
+Kuratowski, Kazimierz. 1930. <span>“Sur Le Probl<span>è</span>me Des Courbes Gauches En Topologie.”</span> <em>Fundamenta Mathematicae</em> 15: 271–83.
+</div>
+<div id="ref-shah2026graphtheory" class="csl-entry" role="listitem">
+Shah, Shrey. 2026. <em>Introduction to Graph Theory</em>. The Polymath Mind. <a href="https://thepolymathmind.blogspot.com/2026/08/introduction-to-graph-theory.html">https://thepolymathmind.blogspot.com/2026/08/introduction-to-graph-theory.html</a>.
+</div>
+<div id="ref-wagner1937" class="csl-entry" role="listitem">
+Wagner, Klaus. 1937. <span>“<span>Ü</span>ber Eine Eigenschaft Der Ebenen Komplexe.”</span> <em>Mathematische Annalen</em> 114: 570–90.
+</div>
 </div>
 </section>
 

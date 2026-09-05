@@ -1,3 +1,7 @@
+% ---------------------------------------------------------------
+% The primary source
+% ---------------------------------------------------------------
+
 @article{abel2018,
   author  = {Abel, Zachary and Alvarez, Victor and Demaine, Erik D. and
              Fekete, S{\'a}ndor P. and Gour, Aman and Hesterberg, Adam and
@@ -7,9 +11,29 @@
   volume  = {32},
   number  = {4},
   pages   = {2675--2702},
-  year    = {2018}
+  year    = {2018},
+  doi     = {10.1137/17M1146579}
 }
 
+% Conference precursor. Worth citing alongside the journal version if you
+% ever refer to the planar 3-color result by its original name.
+@inproceedings{abel2017,
+  author    = {Abel, Zachary and Alvarez, Victor and Demaine, Erik D. and
+               Fekete, S{\'a}ndor P. and Gour, Aman and Hesterberg, Adam and
+               Keldenich, Phillip and Scheffer, Christian},
+  title     = {Three Colors Suffice: Conflict-Free Coloring of Planar Graphs},
+  booktitle = {Proceedings of the 28th Annual ACM-SIAM Symposium on
+               Discrete Algorithms (SODA)},
+  pages     = {1951--1963},
+  year      = {2017}
+}
+
+% ---------------------------------------------------------------
+% Where conflict-free coloring comes from -- supports the cell tower
+% motivation in section 1
+% ---------------------------------------------------------------
+
+% NOTE: verify volume/pages before you rely on these.
 @article{even2003,
   author  = {Even, Guy and Lotker, Zvi and Ron, Dana and Smorodinsky, Shakhar},
   title   = {Conflict-Free Colorings of Simple Geometric Regions with
@@ -21,13 +45,80 @@
   year    = {2003}
 }
 
-@inproceedings{abel2017,
-  author    = {Abel, Zachary and Alvarez, Victor and Demaine, Erik D. and
-               Fekete, S{\'a}ndor P. and Gour, Aman and Hesterberg, Adam and
-               Keldenich, Phillip and Scheffer, Christian},
-  title     = {Three Colors Suffice: Conflict-Free Coloring of Planar Graphs},
-  booktitle = {Proceedings of the Twenty-Eighth Annual ACM-SIAM Symposium
-               on Discrete Algorithms (SODA)},
-  pages     = {1951--1963},
+% ---------------------------------------------------------------
+% Classical results cited in the prerequisites and the Hadwiger callout
+% ---------------------------------------------------------------
+
+@article{hadwiger1943,
+  author  = {Hadwiger, Hugo},
+  title   = {{\"U}ber eine Klassifikation der Streckenkomplexe},
+  journal = {Vierteljahrsschrift der Naturforschenden Gesellschaft in Z{\"u}rich},
+  volume  = {88},
+  pages   = {133--142},
+  year    = {1943}
+}
+
+@article{kuratowski1930,
+  author  = {Kuratowski, Kazimierz},
+  title   = {Sur le probl{\`e}me des courbes gauches en topologie},
+  journal = {Fundamenta Mathematicae},
+  volume  = {15},
+  pages   = {271--283},
+  year    = {1930}
+}
+
+@article{wagner1937,
+  author  = {Wagner, Klaus},
+  title   = {{\"U}ber eine Eigenschaft der ebenen Komplexe},
+  journal = {Mathematische Annalen},
+  volume  = {114},
+  pages   = {570--590},
+  year    = {1937}
+}
+
+@book{diestel2017,
+  author    = {Diestel, Reinhard},
+  title     = {Graph Theory},
+  edition   = {5},
+  series    = {Graduate Texts in Mathematics},
+  volume    = {173},
+  publisher = {Springer},
   year      = {2017}
+}
+
+% ---------------------------------------------------------------
+% Complexity -- the source problem behind the k = 1, 2 planar hardness
+% results you mention at the end of Lemma 3.4
+% ---------------------------------------------------------------
+
+@article{mulzer2008,
+  author  = {Mulzer, Wolfgang and Rote, G{\"u}nter},
+  title   = {Minimum-Weight Triangulation is {NP}-Hard},
+  journal = {Journal of the ACM},
+  volume  = {55},
+  number  = {2},
+  pages   = {11:1--11:29},
+  year    = {2008},
+  note    = {Introduces Positive Planar 1-in-3-SAT and proves it NP-complete}
+}
+
+@inproceedings{schaefer1978,
+  author    = {Schaefer, Thomas J.},
+  title     = {The Complexity of Satisfiability Problems},
+  booktitle = {Proceedings of the 10th Annual ACM Symposium on
+               Theory of Computing (STOC)},
+  pages     = {216--226},
+  year      = {1978}
+}
+
+% ---------------------------------------------------------------
+% Your own prerequisite post, linked bare in section 2
+% ---------------------------------------------------------------
+
+@misc{shah2026graphtheory,
+  author       = {Shah, Shrey},
+  title        = {Introduction to Graph Theory},
+  howpublished = {The Polymath Mind},
+  year         = {2026},
+  url          = {https://thepolymathmind.blogspot.com/2026/08/introduction-to-graph-theory.html}
 }

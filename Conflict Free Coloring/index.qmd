@@ -16,6 +16,9 @@ format:
     number-sections: true
     geometry: margin=1in
     callout-icon: false
+    include-in-header:
+      text: |
+        \setkeys{Gin}{keepaspectratio}
 bibliography: references.bib
 ---
 
@@ -45,13 +48,13 @@ then the cell phone will receive multiple frequencies of the same kind at the sa
 and these signals will collide, causing interference, and preventing network connection. This
 use of frequencies extends to almost every form of wireless communication, including in drone
 swarms, where robots have to communicate their positions with at least one other nearby drone 
-to prevent collision. 
+to prevent collision [@even2003]. 
 
 
-The paper, "Conflict-Free Coloring of Graphs", by Abel et al. establishes that if a 
+The paper, "Conflict-Free Coloring of Graphs", by Abel et al. [@abel2018] establishes that if a 
 given graph does not contain a complete minor of size $k + 1$ (where a minor is a graph
 obtained from the initial graph by contracting or deleting an edge or edges, and/or deleting 
-isolated vertices), then the graph is conflict free colorable with k colors for closed neighborhoods. The paper further proves that all planar graphs (which are graphs that can be arranged such that no two edges overlap), are always conflict free-colorable with 3 colors, though less than 3 colors may suffice. The paper also establishes computational complexity for various methods of conflict free coloring with specific constraints. The paper tackles the algorithmic complexity of minimizing the number of colors and the number of colored vertices, for planar graphs (and variants of planar graphs). They finally establish that for open neighborhoods, every planar **bipartite** graph can be conflict free colored with 4 or fewer
+isolated vertices), then the graph is conflict free colorable with k colors for closed neighborhoods. The paper further proves that all planar graphs (which are graphs that can be arranged such that no two edges overlap), are always conflict free-colorable with 3 colors, though less than 3 colors may suffice [@abel2017]. The paper also establishes computational complexity for various methods of conflict free coloring with specific constraints. The paper tackles the algorithmic complexity of minimizing the number of colors and the number of colored vertices, for planar graphs (and variants of planar graphs). They finally establish that for open neighborhoods, every planar **bipartite** graph can be conflict free colored with 4 or fewer
 colors, and every planar graph has a conflict-free coloring with at most 8 colors.
 
 ### What this document adds
@@ -66,7 +69,7 @@ found throughout the paper.
 
 You will need a working knowledge of very elementary graph theory to understand the concepts. If you need a 
 refresher, this [blog](https://thepolymathmind.blogspot.com/2026/08/introduction-to-graph-theory.html) has a 
-quick and holistic one.
+quick and holistic one [@shah2026graphtheory].
 
 
 **Open and Closed Neighborhoods:** An open neighborhood of a vertex v is the set of vertices adjacent to v. A closed neighborhood 
@@ -260,7 +263,7 @@ graph G {
 Identifying $u$ and $v$ produces a multigraph, with a loop where $e$ used to be and a
 parallel pair for each common neighbor; deleting those recovers a simple graph.
 
-**Wagner-Kurotawski Theorem:** These are two separate theorems, both of which establish that a graph is planar if and and only if it does not contain a $K_5$ or $K_{3,3}$ minor, and does not contain a subgraph that is a subdivision of $K_5$ or $K_{3,3}$. $K_{3,3}$ is shown by @fig-k33 and $K_{5}$, the complete graph on k vertices, is drawn below for reference, remember a planar graph is one that can rearranged on a flat surface such that no edges cross over each other.
+**Wagner-Kurotawski Theorem [@wagner1937; @kuratowski1930]:** These are two separate theorems, both of which establish that a graph is planar if and and only if it does not contain a $K_5$ or $K_{3,3}$ minor, and does not contain a subgraph that is a subdivision of $K_5$ or $K_{3,3}$. $K_{3,3}$ is shown by @fig-k33 and $K_{5}$, the complete graph on k vertices, is drawn below for reference, remember a planar graph is one that can rearranged on a flat surface such that no edges cross over each other.
 
 ```{dot}
 //| label: fig-k5
@@ -2008,7 +2011,7 @@ graph cor36 {
 ::: {.callout-note appearance="simple"}
 **Analogue to Hadwiger's.** The proper-coloring version of this statement
 — if $G$ has no $K_{k+1}$ minor then $\chi_P(G) \le k$ — is **Hadwiger's Conjecture**,
-open since 1943 and still unresolved for $k \ge 6$. The conflict-free version is a
+open since 1943 and still unresolved for $k \ge 6$ [@hadwiger1943]. The conflict-free version is a
 theorem with a page of proof. Given the inequality $\chi_{CF}(G) \le \chi_P(G)$ from
 @sec-definitions, this is a precise sense in which conflict-free coloring is the easier
 problem: the hard conjecture becomes provable.
@@ -2021,34 +2024,19 @@ giving $\chi_{CF} \le 3$ for planar graphs. Excluding $K_4$ and
 $K^{-3}_5 \supseteq K_{2,3}$ likewise gives $\chi_{CF} \le 2$ for outerplanar graphs.
 :::
 
-## Hardness {#sec-hardness}
-
-*TODO: What's being reduced from, and why that source problem. Reductions read
-as arbitrary until you see what structural feature is being exploited.*
-
-*TODO: The gadget. Draw it. Then state what it enforces and verify both
-directions of the correctness argument separately — most write-ups compress
-these into one paragraph and lose the reader.*
-
-## Outerplanar graphs {#sec-outerplanar}
-
-*TODO: Why outerplanar is the tractable case. What does the structure buy you
-that general graphs don't?*
-
-*TODO: The dynamic programming pipeline. What's the state, what's the
-recurrence, what's the order of evaluation, what's the runtime. A worked
-example on a small outerplanar graph would carry this section.*
 
 ## Loose ends {#sec-loose-ends}
 
 ::: {.callout-warning appearance="simple"}
-*TODO: Places where you're unsure, steps you couldn't fully reconstruct, open
-questions the paper raises. Keeping this section visible is a feature — it
-tells readers where the hard parts are and it's honest about the limits of the
-reconstruction.*
+This expository project only covers the conflict-free coloring aspect and does not delve into the specific hardness of outerplanar graphs, and the 
+NP-completeness of conflict-free coloring in planar graphs. The original paper contains additional results and proofs that are not included here. More work has been done,
+specifically in finding an example that shows a graph without the $K^{-3}_{k+3}$ minor that is not colorable because it has the other minor.
+
 :::
 
 ## References {#sec-references}
+
+
 
 ::: {#refs}
 :::
