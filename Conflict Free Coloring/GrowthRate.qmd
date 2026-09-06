@@ -33,11 +33,6 @@ bibliography: references.bib
 
 ## Setup {#sec-setup}
 
-::: {.callout-note appearance="simple"}
-Sections @sec-counting through @sec-comparison are reproduced verbatim from the
-longer walkthrough. This section is the only new material, and exists to make
-the note self-contained.
-:::
 
 We recall the two definitions the result depends on, and nothing else.
 
@@ -290,16 +285,22 @@ $\mathcal{O}\!\left(2^{k \log k}\right)$, for
 **fixed** $k$ the gadget has constant size, which is what makes the reduction in
 Lemma 3.4 run in polynomial time. The exact rate is consistent with both bounds,
 since $\log_2\!\left(k!\,\alpha^k\right) = \Theta(k \log k)$, but the closed form derived in this document along with it's growth raate are strictly
-sharper because we pin the base at $1 + \sqrt2 \approx 2.414$
+sharper because we pin the base at $1 + \sqrt2 \approx 2.414$. Note that the base is the Silver Ratio.
 
-::: {.callout-note appearance="simple"}
-**What the sharper rate buys.** The constant hidden in the reduction of
-[@abel2018, Lemma 3.4] is $C_1 = 2|G_k|$. Under the closed form this is
-$\Theta\!\left(k!\,(1+\sqrt2)^k\right)$, already $752$ at $k = 4$. The reduction
-is therefore linear for each fixed $k$ and catastrophic in $k$, which is why the
-result is a statement about CF $k$-Coloring for each constant $k$ rather than
-about the problem with $k$ given as part of the input.
-:::
+Nothing in [@abel2018] requires this exact rate: for fixed
+$k$ the gadget has constant size, and that is all the polynomial-time reduction
+of Lemma 3.4 needs. The rate clarifies two things the published bounds leave
+open. First, it identifies that
+$\log_2(k!\,\alpha^k) = \Theta(k \log k)$ was slack and that the stated
+$\mathcal{O}(2^{k \log k})$ was already tight in the exponent and the
+$\Omega(2^k)$ was not, so no sharper analysis will pull this construction down
+toward $2^k$. Second, and consequently, the family cannot be repurposed for a
+statement with $k$ part of the input: the $k!$ factor dominates, making the
+blow-up superexponential rather than exponential. Writing $g(k)$ for the fewest
+vertices in any graph with $\chi_{CF} = k$, the family now witnesses
+$g(k) \le \Theta(k!\,(1+\sqrt2)^k)$ exactly. Whether $g(k)$ is that large is
+open.
+
 
 ## References {#sec-references}
 
