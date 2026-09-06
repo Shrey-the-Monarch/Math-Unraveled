@@ -1,0 +1,307 @@
+---
+title: "The Exact Size of the Conflict-Free Gadget Hierarchy"
+subtitle: "A closed form and matching growth rate for $|G_k|$"
+author: "Shrey Shah"
+date: today
+abstract: |
+  Abel et al. (2018) construct a family of graphs $G_k$ with
+  $\chi_{CF}(G_k) = k$, used as the forcing gadget in their proof that
+  conflict-free coloring is NP-complete for every fixed $k \ge 3$. They bound
+  the size of this family between $\Omega(2^k)$ and
+  $\mathcal{O}(2^{k \log k})$. We give a closed form for $|G_k|$ by reducing
+  the size recurrence to a Pell recurrence, and show
+  $|G_k| = \Theta\!\left(k!\,(1+\sqrt{2})^{k}\right)$, with the normalized
+  ratio $|G_k| / (k!\,\alpha^k)$ converging to an explicit constant. The rate
+  is consistent with both published bounds and strictly sharper than either.
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    toc-title: "Contents"
+    number-sections: true
+    html-math-method: mathjax
+  pdf:
+    toc: true
+    number-sections: true
+    geometry: margin=1in
+    callout-icon: false
+    include-in-header:
+      text: |
+        \setkeys{Gin}{keepaspectratio}
+bibliography: references.bib
+---
+
+## Setup {#sec-setup}
+
+::: {.callout-note appearance="simple"}
+Sections @sec-counting through @sec-comparison are reproduced verbatim from the
+longer walkthrough. This section is the only new material, and exists to make
+the note self-contained.
+:::
+
+We recall the two definitions the result depends on, and nothing else.
+
+::: {#def-cf}
+
+### Conflict-free coloring
+
+A **partial $k$-coloring** of $G$ is an assignment $\chi : V' \to \{1, \dots, k\}$
+for some subset $V' \subseteq V(G)$; vertices outside $V'$ are **uncolored**. Such a
+$\chi$ is **conflict-free** with respect to closed neighborhoods if for every
+$v \in V(G)$ there is a vertex $w \in N[v] \cap V'$ whose color is unique in $N[v]$ —
+that is, $\chi(w') \neq \chi(w)$ for every other $w' \in N[v] \cap V'$. We call $w$ the
+**conflict-free neighbor** of $v$. The **conflict-free chromatic number**
+$\chi_{CF}(G)$ is the smallest $k$ for which such a coloring exists.
+:::
+
+The family $G_k$ is built recursively, with $G_1$ a single vertex and $G_2$ the
+star $K_{1,3}$ with one edge subdivided. Given $G_k$ and $G_{k-1}$:
+
+* Take a complete graph $G = K_{k+1}$ on $k+1$ vertices.
+* To each vertex $v \in V(K_{k+1})$ attach two disjoint and independent copies of
+  $G_k$, adding an edge from every $v$ to every vertex of both copies of $G_k$.
+* For each edge $e = vw \in E(K_{k+1})$, add two disjoint and independent copies
+  of $G_{k-1}$, where there is an edge from every $v$ and $w$ to every vertex on
+  both copies of $G_{k-1}$.
+
+This gives $\chi_{CF}(G_k) = k$ for all $k \ge 1$. Only the vertex counts matter
+below.
+
+```{dot}
+//| label: fig-g3
+//| fig-cap: "$G_3$: a $K_3$ core, two copies of $G_2$ on each vertex, two copies of $G_1$ on each edge."
+//| fig-width: 5.5
+graph g3 {
+  layout=neato; graph [bgcolor="transparent", overlap=false, splines=true];
+  node [fontname="Helvetica", fontsize=10, penwidth=1.1];
+  edge [color="#7A7A7A", len=1.5];
+
+  node [shape=circle, style=filled, fixedsize=true, width=0.42, height=0.42];
+  v1 [label="v1", pos="0,2.2!",   fillcolor="#EF9F27", color="#854F0B"];
+  v2 [label="v2", pos="-2,-1.2!", fillcolor="#5DCAA5", color="#0F6E56"];
+  v3 [label="v3", pos="2,-1.2!",  fillcolor="#ED93B1", color="#993556"];
+
+  node [shape=box, style="rounded,filled", fillcolor="#EFE7F7", color="#6B4E9B", width=0.7, height=0.32];
+  a1 [label="G2", pos="-1.3,3.6!"];  a2 [label="G2", pos="1.3,3.6!"];
+  b1 [label="G2", pos="-3.9,-0.7!"]; b2 [label="G2", pos="-3.2,-2.6!"];
+  c1 [label="G2", pos="3.2,-2.6!"];  c2 [label="G2", pos="3.9,-0.7!"];
+
+  node [fillcolor="#E0F3EC", color="#0F6E56"];
+  e12a [label="G1", pos="-1.9,1.0!"];  e12b [label="G1", pos="-2.6,0.4!"];
+  e13a [label="G1", pos="1.9,1.0!"];   e13b [label="G1", pos="2.6,0.4!"];
+  e23a [label="G1", pos="-0.5,-2.1!"]; e23b [label="G1", pos="0.5,-2.1!"];
+
+  v1 -- v2 [penwidth=1.8, color="#333333"];
+  v1 -- v3 [penwidth=1.8, color="#333333"];
+  v2 -- v3 [penwidth=1.8, color="#333333"];
+
+  v1 -- a1; v1 -- a2; v2 -- b1; v2 -- b2; v3 -- c1; v3 -- c2;
+
+  v1 -- e12a; v2 -- e12a; v1 -- e12b; v2 -- e12b;
+  v1 -- e13a; v3 -- e13a; v1 -- e13b; v3 -- e13b;
+  v2 -- e23a; v3 -- e23a; v2 -- e23b; v3 -- e23b;
+}
+```
+
+## Counting the vertices {#sec-counting}
+
+$$|G_1| = 1, \qquad |G_2| = 5, \qquad |G_3| = 3 + 3\big(2|G_2|\big) + 3\big(2|G_1|\big) = 3 + 30 + 6 = 39 .$$
+
+In general, the core contributes $k+1$ vertices, each of the $k+1$ core vertices
+carries $2|G_k|$, and each of the $\binom{k+1}{2}$ core edges carries
+$2|G_{k-1}|$. Since
+
+$$\binom{k+1}{2} = \frac{(k+1)!}{2!\,(k-1)!} = \frac{k(k+1)}{2},$$
+
+we get
+
+$$|G_{k+1}| \;=\; \underbrace{(k+1)}_{v \in K_{k+1}} \;+\; \underbrace{2(k+1)\,|G_k|}_{H \text{ graphs}} \;+\; \underbrace{k(k+1)\,|G_{k-1}|}_{J \text{ graphs}}$$
+
+and factoring out $(k+1)$,
+
+$$\boxed{\;|G_{k+1}| = (k+1)\Big(2|G_k| + k\,|G_{k-1}| + 1\Big).\;}$$
+
+Check: $|G_3| = 3(2\cdot 5 + 2\cdot 1 + 1) = 3 \cdot 13 = 39$ and
+$|G_4| = 4(2 \cdot 39 + 3 \cdot 5 + 1) = 4 \cdot 94 = 376$.
+
+## Algorithmic bounds {#sec-bounds}
+
+Every term of the bracket is positive, so $a_{k+1} \ge 2a_k$, and therefore
+
+$$a_k = \Omega\!\left(2^k\right).$$
+
+This is the bound stated in the paper, and it is all that is needed there. We can
+do better by keeping the factor in front: since $a_{k+1} \ge 2(k+1)a_k$,
+unrolling from $a_2 = 5$ gives
+
+$$a_k \;\ge\; 5 \prod_{j=3}^{k} 2j \;=\; 5 \cdot 2^{k-2} \cdot \frac{k!}{2},$$
+
+so $\log_2 a_k = \Omega(k \log k)$.
+
+The sequence is increasing, so $a_{k-1} \le a_k$, and also $1 \le a_k$. Hence
+
+$$a_{k+1} \;\le\; (k+1)\big(2a_k + k\,a_k + a_k\big) \;=\; (k+1)(k+3)\,a_k \;\le\; (k+3)^2 a_k .$$
+
+Unrolling from $a_1 = 1$,
+
+$$a_{k+1} \;\le\; \prod_{j=1}^{k} (j+3)^2 \;\le\; (k+3)^{2k},$$
+
+and taking logarithms,
+
+$$\log_2 a_{k+1} \;\le\; 2k \log_2 (k+3) \;=\; O(k \log k),$$
+
+so $a_k = \mathcal{O}\!\left(2^{k \log k}\right)$.
+
+### Solving the recurrence
+
+First we rewrite our recurrence as a sequence:
+
+$$a_1 = 1, \qquad a_2 = 5, \qquad a_{k+1} = (k+1)\big(2a_k + k\,a_{k-1} + 1\big), \qquad k, a \in \mathbb{Z}^+ .$$
+
+The $(k+1)$ out front and the $k$ on the second term hide a Pell recurrence. We
+divide it out.
+
+## Normalizing away the factorials {#sec-normalizing}
+
+Divide both sides by $(k+1)!$:
+
+$$\frac{a_{k+1}}{(k+1)!} \;=\; \frac{2a_k + k\,a_{k-1} + 1}{k!} .$$
+
+Let $b_k = \dfrac{a_k}{k!}$. The middle term simplifies because
+$\dfrac{k\,a_{k-1}}{k!} = \dfrac{a_{k-1}}{(k-1)!} = b_{k-1}$, so
+
+$$b_{k+1} \;=\; 2b_k + b_{k-1} + \frac{1}{k!} .$$
+
+Isolating the $1/k!$, what is left is exactly the **Pell recurrence**
+
+$$b_{k+1} = 2b_k + b_{k-1} .$$
+
+The seeds come from the graph: $b_1 = \dfrac{a_1}{1!} = 1$, where $a_1$ is the
+number of vertices in $G_1$, and $b_2 = \dfrac{a_2}{2!} = \dfrac{5}{2}$,
+referencing $K_{1,3}$ for $a_2$.
+
+## The Pell recurrence {#sec-pell}
+
+$$P_n = 2P_{n-1} + P_{n-2}, \qquad P_0 = 0,\; P_1 = 1, \qquad \langle 0,1,2,5,12,29,70,\dots\rangle$$
+
+Set $P_n = r^n$, so $r^n = 2r^{n-1} + r^{n-2}$, giving $r^2 = 2r + 1$ and
+
+$$r^2 - 2r - 1 = 0, \qquad r = \frac{2 \pm \sqrt{4+4}}{2} = \frac{2 \pm \sqrt{8}}{2}, \qquad r = 1 + \sqrt{2},\; r = 1 - \sqrt{2}.$$
+
+The recurrence is linear, so
+
+$$P_n = A\big(1+\sqrt{2}\big)^n + B\big(1-\sqrt{2}\big)^n$$
+
+where $A$ and $B$ satisfy all values of the recurrence. From $P_0 = 0$ we get
+$A = -B$, and from $P_1 = 1$,
+
+$$1 = A\big(1+\sqrt2\big) - A\big(1-\sqrt2\big) = A\big(1 + \sqrt2 + \sqrt2 - 1\big) = A \cdot 2\sqrt2 ,$$
+
+so $A = \dfrac{1}{2\sqrt2}$ and $B = \dfrac{-1}{2\sqrt2}$, giving
+
+$$P_n = \frac{\big(1+\sqrt{2}\big)^n - \big(1-\sqrt{2}\big)^n}{2\sqrt{2}} .$$
+
+### The homogeneous part
+
+Running the Pell recurrence forward from $b_1, b_2$:
+
+$$b_3 = 2b_2 + b_1, \qquad b_4 = 2b_3 + b_2 = 5b_2 + 2b_1, \qquad b_5 = 2b_4 + b_3 = 12b_2 + 5b_1 .$$
+
+The coefficients are Pell numbers, so we generalize:
+
+$$b_k \;=\; P_{k-1}\,b_2 + P_{k-2}\,b_1 \;=\; \frac{5}{2}P_{k-1} + P_{k-2} .$$
+
+### The inhomogeneous part
+
+Our actual recurrence has $1/k!$ added, so
+
+$$b_3 = 6 + \frac{1}{2!} = 6.5, \qquad b_4 = 2b_3 + b_2 + \frac{1}{3!} = 5b_2 + 2b_1 + \frac{1}{3!} + 2\left(\frac{1}{2!}\right),$$
+
+$$b_5 = 2b_4 + b_3 + \frac{1}{4!} = 12b_2 + 5b_1 + 2\left(\frac{1}{3!}\right) + 5\left(\frac{1}{2!}\right) + \frac{1}{4!} .$$
+
+Each factorial creates its own Pell: a term $\dfrac{1}{j!}$ injected at step $j$
+propagates forward with Pell coefficients, contributing $\dfrac{P_{k-j}}{j!}$ to
+$b_k$.
+
+*Verification.* Let $k = 5$, $j = 2$. We have $\dfrac{P_3}{2!}$, where $P_3 = 5$,
+so $\dfrac{5}{2!}$ — which is the coefficient appearing on $\dfrac{1}{2!}$ in
+$b_5$ above.
+
+Accounting for every $j$, for some $k$:
+
+$$\sum_{j=2}^{k-1} \frac{P_{k-j}}{j!} .$$
+
+## The closed form {#sec-closed-form}
+
+Solving for our altered Pell recurrence:
+
+$$b_k \;=\; \frac{5P_{k-1}}{2} + P_{k-2} + \sum_{j=2}^{k-1} \frac{P_{k-j}}{j!} .$$
+
+Remember that $b_k = \dfrac{a_k}{k!}$, and that $a_k$ is just our actual
+recurrence sequentialized, so
+
+$$\boxed{\;|G_k| \;=\; k!\left[\,P_{k-2} + \frac{5P_{k-1}}{2} + \sum_{j=2}^{k-1} \frac{P_{k-j}}{j!}\,\right]\;}$$
+
+with $P_n$ as above. Using the standard backward extension $P_{-1} = 1$, this is
+valid for all $k \ge 1$.
+
+*Check.* $k = 3$ gives $6\left[2 + \tfrac52 + \tfrac{P_1}{2!}\right] = 6(6.5) = 39$,
+and $k = 4$ gives $24\left[5 + \tfrac{25}{2} + \tfrac{P_2}{2!} + \tfrac{P_1}{3!}\right] = 24\left(\tfrac{47}{3}\right) = 376$,
+matching the direct counts. The sequence continues
+$1,\,5,\,39,\,376,\,4545,\,65826,\,1112461,\dots$
+
+## Growth rate {#sec-growth}
+
+Write $\alpha = 1+\sqrt2$ and $\beta = 1-\sqrt2$, so
+
+$$P_n = \frac{\alpha^n - \beta^n}{2\sqrt2} .$$
+
+Since $|\beta| = \sqrt2 - 1 < 1$, the $\beta^n$ term vanishes and
+
+$$\lim_{n \to \infty} P_n = \lim_{n \to \infty} \frac{\alpha^n}{2\sqrt2}, \qquad\text{so}\qquad P_n = \Theta\!\left(\alpha^n\right) = \Theta\!\left(\big(1+\sqrt2\big)^n\right).$$
+
+For the sum, $P_{k-j} = \Theta\!\left(\alpha^{k-j}\right)$, so
+
+$$\sum_{j=2}^{k-1} \frac{P_{k-j}}{j!} \;=\; \Theta\!\left(\sum_{j=2}^{k-1} \frac{\alpha^{k}}{j!\,\alpha^{j}}\right) \;=\; \Theta\!\left(\alpha^{k} \sum_{j=2}^{k-1} \frac{1}{j!\,\alpha^{j}}\right),$$
+
+where $\sum_{j\ge2} \dfrac{1}{j!\,\alpha^{j}}$ converges — to $e^{1/\alpha} - 1 - \tfrac{1}{\alpha}$ —
+so the whole sum is $\Theta\!\left(\alpha^k\right)$. (The $j=2$ term alone is
+already $\Theta(\alpha^k)$, which gives the matching lower bound.)
+
+The remaining pieces $\dfrac{5P_{k-1}}{2}$ and $P_{k-2}$ are Pell recurrences
+multiplied by the constants $\dfrac{5}{2\alpha}$ and $\dfrac{1}{\alpha^2}$
+respectively, so they are both $\Theta\!\left(\alpha^k\right)$ as well.
+
+So $\dfrac{|G_k|}{k!} = \Theta\!\left(\big(1+\sqrt2\big)^k\right)$, and thus
+
+$$\boxed{\;|G_k| \;=\; \Theta\!\left(k!\,\big(1+\sqrt{2}\big)^{k}\right).\;}$$
+
+Because every piece has the same growth constant, the ratio actually converges
+rather than merely being bounded:
+
+$$\lim_{k\to\infty} \frac{|G_k|}{k!\,\alpha^k} \;=\; \frac{1}{2\sqrt2}\left(e^{\sqrt2 - 1} + \frac{1-\sqrt2}{2}\right) \;\approx\; 0.4617667 ,$$
+
+using $1/\alpha = \sqrt2 - 1$.
+
+## Comparison with the paper {#sec-comparison}
+
+The paper states only that $|G_k|$ is in $\Omega\!\left(2^k\right)$ and
+$\mathcal{O}\!\left(2^{k \log k}\right)$, for
+**fixed** $k$ the gadget has constant size, which is what makes the reduction in
+Lemma 3.4 run in polynomial time. The exact rate is consistent with both bounds,
+since $\log_2\!\left(k!\,\alpha^k\right) = \Theta(k \log k)$, but the closed form derived in this document along with it's growth raate are strictly
+sharper because we pin the base at $1 + \sqrt2 \approx 2.414$
+
+::: {.callout-note appearance="simple"}
+**What the sharper rate buys.** The constant hidden in the reduction of
+[@abel2018, Lemma 3.4] is $C_1 = 2|G_k|$. Under the closed form this is
+$\Theta\!\left(k!\,(1+\sqrt2)^k\right)$, already $752$ at $k = 4$. The reduction
+is therefore linear for each fixed $k$ and catastrophic in $k$, which is why the
+result is a statement about CF $k$-Coloring for each constant $k$ rather than
+about the problem with $k$ given as part of the input.
+:::
+
+## References {#sec-references}
+
+::: {#refs}
+:::

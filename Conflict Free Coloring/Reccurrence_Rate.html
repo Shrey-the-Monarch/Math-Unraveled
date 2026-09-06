@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.18">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Shrey Shah">
+<meta name="dcterms.date" content="2026-09-05">
+
+<title>The Exact Size of the Conflict-Free Gadget Hierarchy</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="Reccurrence_Rate_files/libs/clipboard/clipboard.min.js"></script>
+<script src="Reccurrence_Rate_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="Reccurrence_Rate_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="Reccurrence_Rate_files/libs/quarto-html/popper.min.js"></script>
+<script src="Reccurrence_Rate_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="Reccurrence_Rate_files/libs/quarto-html/anchor.min.js"></script>
+<link href="Reccurrence_Rate_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="Reccurrence_Rate_files/libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="Reccurrence_Rate_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="Reccurrence_Rate_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="Reccurrence_Rate_files/libs/bootstrap/bootstrap-917079515d91bccb85b543faf8aa8bb6.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="quarto-light">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Contents</h2>
+   
+  <ul>
+  <li><a href="#sec-setup" id="toc-sec-setup" class="nav-link active" data-scroll-target="#sec-setup"><span class="header-section-number">1</span> Setup</a></li>
+  <li><a href="#sec-counting" id="toc-sec-counting" class="nav-link" data-scroll-target="#sec-counting"><span class="header-section-number">2</span> Counting the vertices</a></li>
+  <li><a href="#sec-bounds" id="toc-sec-bounds" class="nav-link" data-scroll-target="#sec-bounds"><span class="header-section-number">3</span> Algorithmic bounds</a>
+  <ul class="collapse">
+  <li><a href="#solving-the-recurrence" id="toc-solving-the-recurrence" class="nav-link" data-scroll-target="#solving-the-recurrence"><span class="header-section-number">3.1</span> Solving the recurrence</a></li>
+  </ul></li>
+  <li><a href="#sec-normalizing" id="toc-sec-normalizing" class="nav-link" data-scroll-target="#sec-normalizing"><span class="header-section-number">4</span> Normalizing away the factorials</a></li>
+  <li><a href="#sec-pell" id="toc-sec-pell" class="nav-link" data-scroll-target="#sec-pell"><span class="header-section-number">5</span> The Pell recurrence</a>
+  <ul class="collapse">
+  <li><a href="#the-homogeneous-part" id="toc-the-homogeneous-part" class="nav-link" data-scroll-target="#the-homogeneous-part"><span class="header-section-number">5.1</span> The homogeneous part</a></li>
+  <li><a href="#the-inhomogeneous-part" id="toc-the-inhomogeneous-part" class="nav-link" data-scroll-target="#the-inhomogeneous-part"><span class="header-section-number">5.2</span> The inhomogeneous part</a></li>
+  </ul></li>
+  <li><a href="#sec-closed-form" id="toc-sec-closed-form" class="nav-link" data-scroll-target="#sec-closed-form"><span class="header-section-number">6</span> The closed form</a></li>
+  <li><a href="#sec-growth" id="toc-sec-growth" class="nav-link" data-scroll-target="#sec-growth"><span class="header-section-number">7</span> Growth rate</a></li>
+  <li><a href="#sec-comparison" id="toc-sec-comparison" class="nav-link" data-scroll-target="#sec-comparison"><span class="header-section-number">8</span> Comparison with the paper</a></li>
+  <li><a href="#sec-references" id="toc-sec-references" class="nav-link" data-scroll-target="#sec-references"><span class="header-section-number">9</span> References</a></li>
+  </ul>
+<div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="Reccurrence_Rate.pdf"><i class="bi bi-file-pdf"></i>PDF</a></li></ul></div></nav>
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">The Exact Size of the Conflict-Free Gadget Hierarchy</h1>
+<p class="subtitle lead">A closed form and matching growth rate for <span class="math inline">\(|G_k|\)</span></p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Shrey Shah </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">September 5, 2026</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+<div>
+  <div class="abstract">
+    <div class="block-title">Abstract</div>
+    <p>Abel et al.&nbsp;(2018) construct a family of graphs <span class="math inline">\(G_k\)</span> with <span class="math inline">\(\chi_{CF}(G_k) = k\)</span>, used as the forcing gadget in their proof that conflict-free coloring is NP-complete for every fixed <span class="math inline">\(k \ge 3\)</span>. They bound the size of this family between <span class="math inline">\(\Omega(2^k)\)</span> and <span class="math inline">\(\mathcal{O}(2^{k \log k})\)</span>. We give a closed form for <span class="math inline">\(|G_k|\)</span> by reducing the size recurrence to a Pell recurrence, and show <span class="math inline">\(|G_k| = \Theta\!\left(k!\,(1+\sqrt{2})^{k}\right)\)</span>, with the normalized ratio <span class="math inline">\(|G_k| / (k!\,\alpha^k)\)</span> converging to an explicit constant. The rate is consistent with both published bounds and strictly sharper than either.</p>
+  </div>
+</div>
+
+
+</header>
+
+
+<section id="sec-setup" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="sec-setup"><span class="header-section-number">1</span> Setup</h2>
+<div class="callout callout-style-simple callout-note">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-body-container">
+<p>Sections <a href="#sec-counting" class="quarto-xref">Section&nbsp;2</a> through <a href="#sec-comparison" class="quarto-xref">Section&nbsp;8</a> are reproduced verbatim from the longer walkthrough. This section is the only new material, and exists to make the note self-contained.</p>
+</div>
+</div>
+</div>
+<p>We recall the two definitions the result depends on, and nothing else.</p>
+<div id="def-cf" class="theorem definition">
+<p><span class="theorem-title"><strong>Definition 1 (Conflict-free coloring)</strong></span> A <strong>partial <span class="math inline">\(k\)</span>-coloring</strong> of <span class="math inline">\(G\)</span> is an assignment <span class="math inline">\(\chi : V' \to \{1, \dots, k\}\)</span> for some subset <span class="math inline">\(V' \subseteq V(G)\)</span>; vertices outside <span class="math inline">\(V'\)</span> are <strong>uncolored</strong>. Such a <span class="math inline">\(\chi\)</span> is <strong>conflict-free</strong> with respect to closed neighborhoods if for every <span class="math inline">\(v \in V(G)\)</span> there is a vertex <span class="math inline">\(w \in N[v] \cap V'\)</span> whose color is unique in <span class="math inline">\(N[v]\)</span> — that is, <span class="math inline">\(\chi(w') \neq \chi(w)\)</span> for every other <span class="math inline">\(w' \in N[v] \cap V'\)</span>. We call <span class="math inline">\(w\)</span> the <strong>conflict-free neighbor</strong> of <span class="math inline">\(v\)</span>. The <strong>conflict-free chromatic number</strong> <span class="math inline">\(\chi_{CF}(G)\)</span> is the smallest <span class="math inline">\(k\)</span> for which such a coloring exists.</p>
+</div>
+<p>The family <span class="math inline">\(G_k\)</span> is built recursively, with <span class="math inline">\(G_1\)</span> a single vertex and <span class="math inline">\(G_2\)</span> the star <span class="math inline">\(K_{1,3}\)</span> with one edge subdivided. Given <span class="math inline">\(G_k\)</span> and <span class="math inline">\(G_{k-1}\)</span>:</p>
+<ul>
+<li>Take a complete graph <span class="math inline">\(G = K_{k+1}\)</span> on <span class="math inline">\(k+1\)</span> vertices.</li>
+<li>To each vertex <span class="math inline">\(v \in V(K_{k+1})\)</span> attach two disjoint and independent copies of <span class="math inline">\(G_k\)</span>, adding an edge from every <span class="math inline">\(v\)</span> to every vertex of both copies of <span class="math inline">\(G_k\)</span>.</li>
+<li>For each edge <span class="math inline">\(e = vw \in E(K_{k+1})\)</span>, add two disjoint and independent copies of <span class="math inline">\(G_{k-1}\)</span>, where there is an edge from every <span class="math inline">\(v\)</span> and <span class="math inline">\(w\)</span> to every vertex on both copies of <span class="math inline">\(G_{k-1}\)</span>.</li>
+</ul>
+<p>This gives <span class="math inline">\(\chi_{CF}(G_k) = k\)</span> for all <span class="math inline">\(k \ge 1\)</span>. Only the vertex counts matter below.</p>
+<div class="cell" data-fig-width="5.5" data-layout-align="default">
+<div class="cell-output-display">
+<div id="fig-g3" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-g3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div>
+<svg width="528" height="480" viewbox="0.00 0.00 619.60 477.40" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" style="; max-width: none; max-height: none">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 473.4)">
+<title>g3</title>
+<!-- v1 -->
+<g id="node1" class="node">
+<title>v1</title>
+<ellipse fill="#ef9f27" stroke="#854f0b" stroke-width="1.1" cx="305.8" cy="-357.1" rx="15" ry="15"></ellipse>
+<text text-anchor="middle" x="305.8" y="-354.1" font-family="Helvetica,sans-Serif" font-size="10.00">v1</text>
+</g>
+<!-- v2 -->
+<g id="node2" class="node">
+<title>v2</title>
+<ellipse fill="#5dcaa5" stroke="#0f6e56" stroke-width="1.1" cx="161.8" cy="-112.3" rx="15" ry="15"></ellipse>
+<text text-anchor="middle" x="161.8" y="-109.3" font-family="Helvetica,sans-Serif" font-size="10.00">v2</text>
+</g>
+<!-- v1&#45;&#45;v2 -->
+<g id="edge1" class="edge">
+<title>v1--v2</title>
+<path fill="none" stroke="#333333" stroke-width="1.8" d="M298.06,-343.94C273,-301.33 194.27,-167.5 169.41,-125.23"></path>
+</g>
+<!-- v3 -->
+<g id="node3" class="node">
+<title>v3</title>
+<ellipse fill="#ed93b1" stroke="#993556" stroke-width="1.1" cx="449.8" cy="-112.3" rx="15" ry="15"></ellipse>
+<text text-anchor="middle" x="449.8" y="-109.3" font-family="Helvetica,sans-Serif" font-size="10.00">v3</text>
+</g>
+<!-- v1&#45;&#45;v3 -->
+<g id="edge2" class="edge">
+<title>v1--v3</title>
+<path fill="none" stroke="#333333" stroke-width="1.8" d="M313.54,-343.94C338.6,-301.33 417.33,-167.5 442.19,-125.23"></path>
+</g>
+<!-- a1 -->
+<g id="node4" class="node">
+<title>a1</title>
+<path fill="#efe7f7" stroke="#6b4e9b" stroke-width="1.1" d="M229.53,-469.4C229.53,-469.4 194.87,-469.4 194.87,-469.4 191.03,-469.4 187.2,-465.57 187.2,-461.73 187.2,-461.73 187.2,-454.07 187.2,-454.07 187.2,-450.23 191.03,-446.4 194.87,-446.4 194.87,-446.4 229.53,-446.4 229.53,-446.4 233.37,-446.4 237.2,-450.23 237.2,-454.07 237.2,-454.07 237.2,-461.73 237.2,-461.73 237.2,-465.57 233.37,-469.4 229.53,-469.4"></path>
+<text text-anchor="middle" x="212.2" y="-454.9" font-family="Helvetica,sans-Serif" font-size="10.00">G2</text>
+</g>
+<!-- v1&#45;&#45;a1 -->
+<g id="edge4" class="edge">
+<title>v1--a1</title>
+<path fill="none" stroke="#7a7a7a" d="M295.43,-368.27C277.53,-387.55 241.03,-426.85 222.91,-446.37"></path>
+</g>
+<!-- a2 -->
+<g id="node5" class="node">
+<title>a2</title>
+<path fill="#efe7f7" stroke="#6b4e9b" stroke-width="1.1" d="M416.73,-469.4C416.73,-469.4 382.07,-469.4 382.07,-469.4 378.23,-469.4 374.4,-465.57 374.4,-461.73 374.4,-461.73 374.4,-454.07 374.4,-454.07 374.4,-450.23 378.23,-446.4 382.07,-446.4 382.07,-446.4 416.73,-446.4 416.73,-446.4 420.57,-446.4 424.4,-450.23 424.4,-454.07 424.4,-454.07 424.4,-461.73 424.4,-461.73 424.4,-465.57 420.57,-469.4 416.73,-469.4"></path>
+<text text-anchor="middle" x="399.4" y="-454.9" font-family="Helvetica,sans-Serif" font-size="10.00">G2</text>
+</g>
+<!-- v1&#45;&#45;a2 -->
+<g id="edge5" class="edge">
+<title>v1--a2</title>
+<path fill="none" stroke="#7a7a7a" d="M316.17,-368.27C334.07,-387.55 370.57,-426.85 388.69,-446.37"></path>
+</g>
+<!-- e12a -->
+<g id="node10" class="node">
+<title>e12a</title>
+<path fill="#e0f3ec" stroke="#0f6e56" stroke-width="1.1" d="M186.33,-282.2C186.33,-282.2 151.67,-282.2 151.67,-282.2 147.83,-282.2 144,-278.37 144,-274.53 144,-274.53 144,-266.87 144,-266.87 144,-263.03 147.83,-259.2 151.67,-259.2 151.67,-259.2 186.33,-259.2 186.33,-259.2 190.17,-259.2 194,-263.03 194,-266.87 194,-266.87 194,-274.53 194,-274.53 194,-278.37 190.17,-282.2 186.33,-282.2"></path>
+<text text-anchor="middle" x="169" y="-267.7" font-family="Helvetica,sans-Serif" font-size="10.00">G1</text>
+</g>
+<!-- v1&#45;&#45;e12a -->
+<g id="edge10" class="edge">
+<title>v1--e12a</title>
+<path fill="none" stroke="#7a7a7a" d="M292.93,-348.97C268.59,-333.6 215.72,-300.21 187.55,-282.41"></path>
+</g>
+<!-- e12b -->
+<g id="node11" class="node">
+<title>e12b</title>
+<path fill="#e0f3ec" stroke="#0f6e56" stroke-width="1.1" d="M135.93,-239C135.93,-239 101.27,-239 101.27,-239 97.43,-239 93.6,-235.17 93.6,-231.33 93.6,-231.33 93.6,-223.67 93.6,-223.67 93.6,-219.83 97.43,-216 101.27,-216 101.27,-216 135.93,-216 135.93,-216 139.77,-216 143.6,-219.83 143.6,-223.67 143.6,-223.67 143.6,-231.33 143.6,-231.33 143.6,-235.17 139.77,-239 135.93,-239"></path>
+<text text-anchor="middle" x="118.6" y="-224.5" font-family="Helvetica,sans-Serif" font-size="10.00">G1</text>
+</g>
+<!-- v1&#45;&#45;e12b -->
+<g id="edge12" class="edge">
+<title>v1--e12b</title>
+<path fill="none" stroke="#7a7a7a" d="M296.19,-345.5C278.55,-324.85 238.96,-281.53 197.2,-256 180.61,-245.85 159.85,-238.52 143.83,-233.84"></path>
+</g>
+<!-- e13a -->
+<g id="node12" class="node">
+<title>e13a</title>
+<path fill="#e0f3ec" stroke="#0f6e56" stroke-width="1.1" d="M459.93,-282.2C459.93,-282.2 425.27,-282.2 425.27,-282.2 421.43,-282.2 417.6,-278.37 417.6,-274.53 417.6,-274.53 417.6,-266.87 417.6,-266.87 417.6,-263.03 421.43,-259.2 425.27,-259.2 425.27,-259.2 459.93,-259.2 459.93,-259.2 463.77,-259.2 467.6,-263.03 467.6,-266.87 467.6,-266.87 467.6,-274.53 467.6,-274.53 467.6,-278.37 463.77,-282.2 459.93,-282.2"></path>
+<text text-anchor="middle" x="442.6" y="-267.7" font-family="Helvetica,sans-Serif" font-size="10.00">G1</text>
+</g>
+<!-- v1&#45;&#45;e13a -->
+<g id="edge14" class="edge">
+<title>v1--e13a</title>
+<path fill="none" stroke="#7a7a7a" d="M318.67,-348.97C343.01,-333.6 395.88,-300.21 424.05,-282.41"></path>
+</g>
+<!-- e13b -->
+<g id="node13" class="node">
+<title>e13b</title>
+<path fill="#e0f3ec" stroke="#0f6e56" stroke-width="1.1" d="M510.33,-239C510.33,-239 475.67,-239 475.67,-239 471.83,-239 468,-235.17 468,-231.33 468,-231.33 468,-223.67 468,-223.67 468,-219.83 471.83,-216 475.67,-216 475.67,-216 510.33,-216 510.33,-216 514.17,-216 518,-219.83 518,-223.67 518,-223.67 518,-231.33 518,-231.33 518,-235.17 514.17,-239 510.33,-239"></path>
+<text text-anchor="middle" x="493" y="-224.5" font-family="Helvetica,sans-Serif" font-size="10.00">G1</text>
+</g>
+<!-- v1&#45;&#45;e13b -->
+<g id="edge16" class="edge">
+<title>v1--e13b</title>
+<path fill="none" stroke="#7a7a7a" d="M315.41,-345.5C333.05,-324.85 372.64,-281.53 414.4,-256 430.99,-245.85 451.75,-238.52 467.77,-233.84"></path>
+</g>
+<!-- v2&#45;&#45;v3 -->
+<g id="edge3" class="edge">
+<title>v2--v3</title>
+<path fill="none" stroke="#333333" stroke-width="1.8" d="M176.88,-112.3C226.53,-112.3 384.58,-112.3 434.52,-112.3"></path>
+</g>
+<!-- b1 -->
+<g id="node6" class="node">
+<title>b1</title>
+<path fill="#efe7f7" stroke="#6b4e9b" stroke-width="1.1" d="M42.33,-159.8C42.33,-159.8 7.67,-159.8 7.67,-159.8 3.83,-159.8 0,-155.97 0,-152.13 0,-152.13 0,-144.47 0,-144.47 0,-140.63 3.83,-136.8 7.67,-136.8 7.67,-136.8 42.33,-136.8 42.33,-136.8 46.17,-136.8 50,-140.63 50,-144.47 50,-144.47 50,-152.13 50,-152.13 50,-155.97 46.17,-159.8 42.33,-159.8"></path>
+<text text-anchor="middle" x="25" y="-145.3" font-family="Helvetica,sans-Serif" font-size="10.00">G2</text>
+</g>
+<!-- v2&#45;&#45;b1 -->
+<g id="edge6" class="edge">
+<title>v2--b1</title>
+<path fill="none" stroke="#7a7a7a" d="M147.16,-116.15C124,-122.25 78.63,-134.19 50.17,-141.68"></path>
+</g>
+<!-- b2 -->
+<g id="node7" class="node">
+<title>b2</title>
+<path fill="#efe7f7" stroke="#6b4e9b" stroke-width="1.1" d="M92.73,-23C92.73,-23 58.07,-23 58.07,-23 54.23,-23 50.4,-19.17 50.4,-15.33 50.4,-15.33 50.4,-7.67 50.4,-7.67 50.4,-3.83 54.23,0 58.07,0 58.07,0 92.73,0 92.73,0 96.57,0 100.4,-3.83 100.4,-7.67 100.4,-7.67 100.4,-15.33 100.4,-15.33 100.4,-19.17 96.57,-23 92.73,-23"></path>
+<text text-anchor="middle" x="75.4" y="-8.5" font-family="Helvetica,sans-Serif" font-size="10.00">G2</text>
+</g>
+<!-- v2&#45;&#45;b2 -->
+<g id="edge7" class="edge">
+<title>v2--b2</title>
+<path fill="none" stroke="#7a7a7a" d="M151.89,-100.74C135.31,-81.4 102.14,-42.7 85.46,-23.24"></path>
+</g>
+<!-- v2&#45;&#45;e12a -->
+<g id="edge11" class="edge">
+<title>v2--e12a</title>
+<path fill="none" stroke="#7a7a7a" d="M162.49,-127.49C163.92,-158.93 167.18,-230.56 168.46,-258.87"></path>
+</g>
+<!-- v2&#45;&#45;e12b -->
+<g id="edge13" class="edge">
+<title>v2--e12b</title>
+<path fill="none" stroke="#7a7a7a" d="M156.5,-126.43C147.9,-149.38 131.03,-194.34 123.03,-215.7"></path>
+</g>
+<!-- e23a -->
+<g id="node14" class="node">
+<title>e23a</title>
+<path fill="#e0f3ec" stroke="#0f6e56" stroke-width="1.1" d="M287.13,-59C287.13,-59 252.47,-59 252.47,-59 248.63,-59 244.8,-55.17 244.8,-51.33 244.8,-51.33 244.8,-43.67 244.8,-43.67 244.8,-39.83 248.63,-36 252.47,-36 252.47,-36 287.13,-36 287.13,-36 290.97,-36 294.8,-39.83 294.8,-43.67 294.8,-43.67 294.8,-51.33 294.8,-51.33 294.8,-55.17 290.97,-59 287.13,-59"></path>
+<text text-anchor="middle" x="269.8" y="-44.5" font-family="Helvetica,sans-Serif" font-size="10.00">G1</text>
+</g>
+<!-- v2&#45;&#45;e23a -->
+<g id="edge18" class="edge">
+<title>v2--e23a</title>
+<path fill="none" stroke="#7a7a7a" d="M175.04,-104.35C193.97,-93 228.86,-72.06 250.62,-59.01"></path>
+</g>
+<!-- e23b -->
+<g id="node15" class="node">
+<title>e23b</title>
+<path fill="#e0f3ec" stroke="#0f6e56" stroke-width="1.1" d="M359.13,-59C359.13,-59 324.47,-59 324.47,-59 320.63,-59 316.8,-55.17 316.8,-51.33 316.8,-51.33 316.8,-43.67 316.8,-43.67 316.8,-39.83 320.63,-36 324.47,-36 324.47,-36 359.13,-36 359.13,-36 362.97,-36 366.8,-39.83 366.8,-43.67 366.8,-43.67 366.8,-51.33 366.8,-51.33 366.8,-55.17 362.97,-59 359.13,-59"></path>
+<text text-anchor="middle" x="341.8" y="-44.5" font-family="Helvetica,sans-Serif" font-size="10.00">G1</text>
+</g>
+<!-- v2&#45;&#45;e23b -->
+<g id="edge20" class="edge">
+<title>v2--e23b</title>
+<path fill="none" stroke="#7a7a7a" d="M175.92,-107.22C206.34,-96.27 278.38,-70.33 316.74,-56.52"></path>
+</g>
+<!-- c1 -->
+<g id="node8" class="node">
+<title>c1</title>
+<path fill="#efe7f7" stroke="#6b4e9b" stroke-width="1.1" d="M553.53,-23C553.53,-23 518.87,-23 518.87,-23 515.03,-23 511.2,-19.17 511.2,-15.33 511.2,-15.33 511.2,-7.67 511.2,-7.67 511.2,-3.83 515.03,0 518.87,0 518.87,0 553.53,0 553.53,0 557.37,0 561.2,-3.83 561.2,-7.67 561.2,-7.67 561.2,-15.33 561.2,-15.33 561.2,-19.17 557.37,-23 553.53,-23"></path>
+<text text-anchor="middle" x="536.2" y="-8.5" font-family="Helvetica,sans-Serif" font-size="10.00">G2</text>
+</g>
+<!-- v3&#45;&#45;c1 -->
+<g id="edge8" class="edge">
+<title>v3--c1</title>
+<path fill="none" stroke="#7a7a7a" d="M459.71,-100.74C476.29,-81.4 509.46,-42.7 526.14,-23.24"></path>
+</g>
+<!-- c2 -->
+<g id="node9" class="node">
+<title>c2</title>
+<path fill="#efe7f7" stroke="#6b4e9b" stroke-width="1.1" d="M603.93,-159.8C603.93,-159.8 569.27,-159.8 569.27,-159.8 565.43,-159.8 561.6,-155.97 561.6,-152.13 561.6,-152.13 561.6,-144.47 561.6,-144.47 561.6,-140.63 565.43,-136.8 569.27,-136.8 569.27,-136.8 603.93,-136.8 603.93,-136.8 607.77,-136.8 611.6,-140.63 611.6,-144.47 611.6,-144.47 611.6,-152.13 611.6,-152.13 611.6,-155.97 607.77,-159.8 603.93,-159.8"></path>
+<text text-anchor="middle" x="586.6" y="-145.3" font-family="Helvetica,sans-Serif" font-size="10.00">G2</text>
+</g>
+<!-- v3&#45;&#45;c2 -->
+<g id="edge9" class="edge">
+<title>v3--c2</title>
+<path fill="none" stroke="#7a7a7a" d="M464.44,-116.15C487.6,-122.25 532.97,-134.19 561.43,-141.68"></path>
+</g>
+<!-- v3&#45;&#45;e13a -->
+<g id="edge15" class="edge">
+<title>v3--e13a</title>
+<path fill="none" stroke="#7a7a7a" d="M449.11,-127.49C447.68,-158.93 444.42,-230.56 443.14,-258.87"></path>
+</g>
+<!-- v3&#45;&#45;e13b -->
+<g id="edge17" class="edge">
+<title>v3--e13b</title>
+<path fill="none" stroke="#7a7a7a" d="M455.1,-126.43C463.7,-149.38 480.57,-194.34 488.57,-215.7"></path>
+</g>
+<!-- v3&#45;&#45;e23a -->
+<g id="edge19" class="edge">
+<title>v3--e23a</title>
+<path fill="none" stroke="#7a7a7a" d="M435.68,-107.22C405.26,-96.27 333.22,-70.33 294.86,-56.52"></path>
+</g>
+<!-- v3&#45;&#45;e23b -->
+<g id="edge21" class="edge">
+<title>v3--e23b</title>
+<path fill="none" stroke="#7a7a7a" d="M436.56,-104.35C417.63,-93 382.74,-72.06 360.98,-59.01"></path>
+</g>
+</g>
+</svg>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-g3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: <span class="math inline">\(G_3\)</span>: a <span class="math inline">\(K_3\)</span> core, two copies of <span class="math inline">\(G_2\)</span> on each vertex, two copies of <span class="math inline">\(G_1\)</span> on each edge.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="sec-counting" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="sec-counting"><span class="header-section-number">2</span> Counting the vertices</h2>
+<p><span class="math display">\[|G_1| = 1, \qquad |G_2| = 5, \qquad |G_3| = 3 + 3\big(2|G_2|\big) + 3\big(2|G_1|\big) = 3 + 30 + 6 = 39 .\]</span></p>
+<p>In general, the core contributes <span class="math inline">\(k+1\)</span> vertices, each of the <span class="math inline">\(k+1\)</span> core vertices carries <span class="math inline">\(2|G_k|\)</span>, and each of the <span class="math inline">\(\binom{k+1}{2}\)</span> core edges carries <span class="math inline">\(2|G_{k-1}|\)</span>. Since</p>
+<p><span class="math display">\[\binom{k+1}{2} = \frac{(k+1)!}{2!\,(k-1)!} = \frac{k(k+1)}{2},\]</span></p>
+<p>we get</p>
+<p><span class="math display">\[|G_{k+1}| \;=\; \underbrace{(k+1)}_{v \in K_{k+1}} \;+\; \underbrace{2(k+1)\,|G_k|}_{H \text{ graphs}} \;+\; \underbrace{k(k+1)\,|G_{k-1}|}_{J \text{ graphs}}\]</span></p>
+<p>and factoring out <span class="math inline">\((k+1)\)</span>,</p>
+<p><span class="math display">\[\boxed{\;|G_{k+1}| = (k+1)\Big(2|G_k| + k\,|G_{k-1}| + 1\Big).\;}\]</span></p>
+<p>Check: <span class="math inline">\(|G_3| = 3(2\cdot 5 + 2\cdot 1 + 1) = 3 \cdot 13 = 39\)</span> and <span class="math inline">\(|G_4| = 4(2 \cdot 39 + 3 \cdot 5 + 1) = 4 \cdot 94 = 376\)</span>.</p>
+</section>
+<section id="sec-bounds" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="sec-bounds"><span class="header-section-number">3</span> Algorithmic bounds</h2>
+<p>Every term of the bracket is positive, so <span class="math inline">\(a_{k+1} \ge 2a_k\)</span>, and therefore</p>
+<p><span class="math display">\[a_k = \Omega\!\left(2^k\right).\]</span></p>
+<p>This is the bound stated in the paper, and it is all that is needed there. We can do better by keeping the factor in front: since <span class="math inline">\(a_{k+1} \ge 2(k+1)a_k\)</span>, unrolling from <span class="math inline">\(a_2 = 5\)</span> gives</p>
+<p><span class="math display">\[a_k \;\ge\; 5 \prod_{j=3}^{k} 2j \;=\; 5 \cdot 2^{k-2} \cdot \frac{k!}{2},\]</span></p>
+<p>so <span class="math inline">\(\log_2 a_k = \Omega(k \log k)\)</span>.</p>
+<p>The sequence is increasing, so <span class="math inline">\(a_{k-1} \le a_k\)</span>, and also <span class="math inline">\(1 \le a_k\)</span>. Hence</p>
+<p><span class="math display">\[a_{k+1} \;\le\; (k+1)\big(2a_k + k\,a_k + a_k\big) \;=\; (k+1)(k+3)\,a_k \;\le\; (k+3)^2 a_k .\]</span></p>
+<p>Unrolling from <span class="math inline">\(a_1 = 1\)</span>,</p>
+<p><span class="math display">\[a_{k+1} \;\le\; \prod_{j=1}^{k} (j+3)^2 \;\le\; (k+3)^{2k},\]</span></p>
+<p>and taking logarithms,</p>
+<p><span class="math display">\[\log_2 a_{k+1} \;\le\; 2k \log_2 (k+3) \;=\; O(k \log k),\]</span></p>
+<p>so <span class="math inline">\(a_k = \mathcal{O}\!\left(2^{k \log k}\right)\)</span>.</p>
+<section id="solving-the-recurrence" class="level3" data-number="3.1">
+<h3 data-number="3.1" class="anchored" data-anchor-id="solving-the-recurrence"><span class="header-section-number">3.1</span> Solving the recurrence</h3>
+<p>First we rewrite our recurrence as a sequence:</p>
+<p><span class="math display">\[a_1 = 1, \qquad a_2 = 5, \qquad a_{k+1} = (k+1)\big(2a_k + k\,a_{k-1} + 1\big), \qquad k, a \in \mathbb{Z}^+ .\]</span></p>
+<p>The <span class="math inline">\((k+1)\)</span> out front and the <span class="math inline">\(k\)</span> on the second term hide a Pell recurrence. We divide it out.</p>
+</section>
+</section>
+<section id="sec-normalizing" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="sec-normalizing"><span class="header-section-number">4</span> Normalizing away the factorials</h2>
+<p>Divide both sides by <span class="math inline">\((k+1)!\)</span>:</p>
+<p><span class="math display">\[\frac{a_{k+1}}{(k+1)!} \;=\; \frac{2a_k + k\,a_{k-1} + 1}{k!} .\]</span></p>
+<p>Let <span class="math inline">\(b_k = \dfrac{a_k}{k!}\)</span>. The middle term simplifies because <span class="math inline">\(\dfrac{k\,a_{k-1}}{k!} = \dfrac{a_{k-1}}{(k-1)!} = b_{k-1}\)</span>, so</p>
+<p><span class="math display">\[b_{k+1} \;=\; 2b_k + b_{k-1} + \frac{1}{k!} .\]</span></p>
+<p>Isolating the <span class="math inline">\(1/k!\)</span>, what is left is exactly the <strong>Pell recurrence</strong></p>
+<p><span class="math display">\[b_{k+1} = 2b_k + b_{k-1} .\]</span></p>
+<p>The seeds come from the graph: <span class="math inline">\(b_1 = \dfrac{a_1}{1!} = 1\)</span>, where <span class="math inline">\(a_1\)</span> is the number of vertices in <span class="math inline">\(G_1\)</span>, and <span class="math inline">\(b_2 = \dfrac{a_2}{2!} = \dfrac{5}{2}\)</span>, referencing <span class="math inline">\(K_{1,3}\)</span> for <span class="math inline">\(a_2\)</span>.</p>
+</section>
+<section id="sec-pell" class="level2" data-number="5">
+<h2 data-number="5" class="anchored" data-anchor-id="sec-pell"><span class="header-section-number">5</span> The Pell recurrence</h2>
+<p><span class="math display">\[P_n = 2P_{n-1} + P_{n-2}, \qquad P_0 = 0,\; P_1 = 1, \qquad \langle 0,1,2,5,12,29,70,\dots\rangle\]</span></p>
+<p>Set <span class="math inline">\(P_n = r^n\)</span>, so <span class="math inline">\(r^n = 2r^{n-1} + r^{n-2}\)</span>, giving <span class="math inline">\(r^2 = 2r + 1\)</span> and</p>
+<p><span class="math display">\[r^2 - 2r - 1 = 0, \qquad r = \frac{2 \pm \sqrt{4+4}}{2} = \frac{2 \pm \sqrt{8}}{2}, \qquad r = 1 + \sqrt{2},\; r = 1 - \sqrt{2}.\]</span></p>
+<p>The recurrence is linear, so</p>
+<p><span class="math display">\[P_n = A\big(1+\sqrt{2}\big)^n + B\big(1-\sqrt{2}\big)^n\]</span></p>
+<p>where <span class="math inline">\(A\)</span> and <span class="math inline">\(B\)</span> satisfy all values of the recurrence. From <span class="math inline">\(P_0 = 0\)</span> we get <span class="math inline">\(A = -B\)</span>, and from <span class="math inline">\(P_1 = 1\)</span>,</p>
+<p><span class="math display">\[1 = A\big(1+\sqrt2\big) - A\big(1-\sqrt2\big) = A\big(1 + \sqrt2 + \sqrt2 - 1\big) = A \cdot 2\sqrt2 ,\]</span></p>
+<p>so <span class="math inline">\(A = \dfrac{1}{2\sqrt2}\)</span> and <span class="math inline">\(B = \dfrac{-1}{2\sqrt2}\)</span>, giving</p>
+<p><span class="math display">\[P_n = \frac{\big(1+\sqrt{2}\big)^n - \big(1-\sqrt{2}\big)^n}{2\sqrt{2}} .\]</span></p>
+<section id="the-homogeneous-part" class="level3" data-number="5.1">
+<h3 data-number="5.1" class="anchored" data-anchor-id="the-homogeneous-part"><span class="header-section-number">5.1</span> The homogeneous part</h3>
+<p>Running the Pell recurrence forward from <span class="math inline">\(b_1, b_2\)</span>:</p>
+<p><span class="math display">\[b_3 = 2b_2 + b_1, \qquad b_4 = 2b_3 + b_2 = 5b_2 + 2b_1, \qquad b_5 = 2b_4 + b_3 = 12b_2 + 5b_1 .\]</span></p>
+<p>The coefficients are Pell numbers, so we generalize:</p>
+<p><span class="math display">\[b_k \;=\; P_{k-1}\,b_2 + P_{k-2}\,b_1 \;=\; \frac{5}{2}P_{k-1} + P_{k-2} .\]</span></p>
+</section>
+<section id="the-inhomogeneous-part" class="level3" data-number="5.2">
+<h3 data-number="5.2" class="anchored" data-anchor-id="the-inhomogeneous-part"><span class="header-section-number">5.2</span> The inhomogeneous part</h3>
+<p>Our actual recurrence has <span class="math inline">\(1/k!\)</span> added, so</p>
+<p><span class="math display">\[b_3 = 6 + \frac{1}{2!} = 6.5, \qquad b_4 = 2b_3 + b_2 + \frac{1}{3!} = 5b_2 + 2b_1 + \frac{1}{3!} + 2\left(\frac{1}{2!}\right),\]</span></p>
+<p><span class="math display">\[b_5 = 2b_4 + b_3 + \frac{1}{4!} = 12b_2 + 5b_1 + 2\left(\frac{1}{3!}\right) + 5\left(\frac{1}{2!}\right) + \frac{1}{4!} .\]</span></p>
+<p>Each factorial creates its own Pell: a term <span class="math inline">\(\dfrac{1}{j!}\)</span> injected at step <span class="math inline">\(j\)</span> propagates forward with Pell coefficients, contributing <span class="math inline">\(\dfrac{P_{k-j}}{j!}\)</span> to <span class="math inline">\(b_k\)</span>.</p>
+<p><em>Verification.</em> Let <span class="math inline">\(k = 5\)</span>, <span class="math inline">\(j = 2\)</span>. We have <span class="math inline">\(\dfrac{P_3}{2!}\)</span>, where <span class="math inline">\(P_3 = 5\)</span>, so <span class="math inline">\(\dfrac{5}{2!}\)</span> — which is the coefficient appearing on <span class="math inline">\(\dfrac{1}{2!}\)</span> in <span class="math inline">\(b_5\)</span> above.</p>
+<p>Accounting for every <span class="math inline">\(j\)</span>, for some <span class="math inline">\(k\)</span>:</p>
+<p><span class="math display">\[\sum_{j=2}^{k-1} \frac{P_{k-j}}{j!} .\]</span></p>
+</section>
+</section>
+<section id="sec-closed-form" class="level2" data-number="6">
+<h2 data-number="6" class="anchored" data-anchor-id="sec-closed-form"><span class="header-section-number">6</span> The closed form</h2>
+<p>Solving for our altered Pell recurrence:</p>
+<p><span class="math display">\[b_k \;=\; \frac{5P_{k-1}}{2} + P_{k-2} + \sum_{j=2}^{k-1} \frac{P_{k-j}}{j!} .\]</span></p>
+<p>Remember that <span class="math inline">\(b_k = \dfrac{a_k}{k!}\)</span>, and that <span class="math inline">\(a_k\)</span> is just our actual recurrence sequentialized, so</p>
+<p><span class="math display">\[\boxed{\;|G_k| \;=\; k!\left[\,P_{k-2} + \frac{5P_{k-1}}{2} + \sum_{j=2}^{k-1} \frac{P_{k-j}}{j!}\,\right]\;}\]</span></p>
+<p>with <span class="math inline">\(P_n\)</span> as above. Using the standard backward extension <span class="math inline">\(P_{-1} = 1\)</span>, this is valid for all <span class="math inline">\(k \ge 1\)</span>.</p>
+<p><em>Check.</em> <span class="math inline">\(k = 3\)</span> gives <span class="math inline">\(6\left[2 + \tfrac52 + \tfrac{P_1}{2!}\right] = 6(6.5) = 39\)</span>, and <span class="math inline">\(k = 4\)</span> gives <span class="math inline">\(24\left[5 + \tfrac{25}{2} + \tfrac{P_2}{2!} + \tfrac{P_1}{3!}\right] = 24\left(\tfrac{47}{3}\right) = 376\)</span>, matching the direct counts. The sequence continues <span class="math inline">\(1,\,5,\,39,\,376,\,4545,\,65826,\,1112461,\dots\)</span></p>
+</section>
+<section id="sec-growth" class="level2" data-number="7">
+<h2 data-number="7" class="anchored" data-anchor-id="sec-growth"><span class="header-section-number">7</span> Growth rate</h2>
+<p>Write <span class="math inline">\(\alpha = 1+\sqrt2\)</span> and <span class="math inline">\(\beta = 1-\sqrt2\)</span>, so</p>
+<p><span class="math display">\[P_n = \frac{\alpha^n - \beta^n}{2\sqrt2} .\]</span></p>
+<p>Since <span class="math inline">\(|\beta| = \sqrt2 - 1 &lt; 1\)</span>, the <span class="math inline">\(\beta^n\)</span> term vanishes and</p>
+<p><span class="math display">\[\lim_{n \to \infty} P_n = \lim_{n \to \infty} \frac{\alpha^n}{2\sqrt2}, \qquad\text{so}\qquad P_n = \Theta\!\left(\alpha^n\right) = \Theta\!\left(\big(1+\sqrt2\big)^n\right).\]</span></p>
+<p>For the sum, <span class="math inline">\(P_{k-j} = \Theta\!\left(\alpha^{k-j}\right)\)</span>, so</p>
+<p><span class="math display">\[\sum_{j=2}^{k-1} \frac{P_{k-j}}{j!} \;=\; \Theta\!\left(\sum_{j=2}^{k-1} \frac{\alpha^{k}}{j!\,\alpha^{j}}\right) \;=\; \Theta\!\left(\alpha^{k} \sum_{j=2}^{k-1} \frac{1}{j!\,\alpha^{j}}\right),\]</span></p>
+<p>where <span class="math inline">\(\sum_{j\ge2} \dfrac{1}{j!\,\alpha^{j}}\)</span> converges — to <span class="math inline">\(e^{1/\alpha} - 1 - \tfrac{1}{\alpha}\)</span> — so the whole sum is <span class="math inline">\(\Theta\!\left(\alpha^k\right)\)</span>. (The <span class="math inline">\(j=2\)</span> term alone is already <span class="math inline">\(\Theta(\alpha^k)\)</span>, which gives the matching lower bound.)</p>
+<p>The remaining pieces <span class="math inline">\(\dfrac{5P_{k-1}}{2}\)</span> and <span class="math inline">\(P_{k-2}\)</span> are Pell recurrences multiplied by the constants <span class="math inline">\(\dfrac{5}{2\alpha}\)</span> and <span class="math inline">\(\dfrac{1}{\alpha^2}\)</span> respectively, so they are both <span class="math inline">\(\Theta\!\left(\alpha^k\right)\)</span> as well.</p>
+<p>So <span class="math inline">\(\dfrac{|G_k|}{k!} = \Theta\!\left(\big(1+\sqrt2\big)^k\right)\)</span>, and thus</p>
+<p><span class="math display">\[\boxed{\;|G_k| \;=\; \Theta\!\left(k!\,\big(1+\sqrt{2}\big)^{k}\right).\;}\]</span></p>
+<p>Because every piece has the same growth constant, the ratio actually converges rather than merely being bounded:</p>
+<p><span class="math display">\[\lim_{k\to\infty} \frac{|G_k|}{k!\,\alpha^k} \;=\; \frac{1}{2\sqrt2}\left(e^{\sqrt2 - 1} + \frac{1-\sqrt2}{2}\right) \;\approx\; 0.4617667 ,\]</span></p>
+<p>using <span class="math inline">\(1/\alpha = \sqrt2 - 1\)</span>.</p>
+</section>
+<section id="sec-comparison" class="level2" data-number="8">
+<h2 data-number="8" class="anchored" data-anchor-id="sec-comparison"><span class="header-section-number">8</span> Comparison with the paper</h2>
+<p>The paper states only that <span class="math inline">\(|G_k|\)</span> is in <span class="math inline">\(\Omega\!\left(2^k\right)\)</span> and <span class="math inline">\(\mathcal{O}\!\left(2^{k \log k}\right)\)</span>, for <strong>fixed</strong> <span class="math inline">\(k\)</span> the gadget has constant size, which is what makes the reduction in Lemma 3.4 run in polynomial time. The exact rate is consistent with both bounds, since <span class="math inline">\(\log_2\!\left(k!\,\alpha^k\right) = \Theta(k \log k)\)</span>, but the closed form derived in this document along with it’s growth raate are strictly sharper because we pin the base at <span class="math inline">\(1 + \sqrt2 \approx 2.414\)</span></p>
+<div class="callout callout-style-simple callout-note">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-body-container">
+<p><strong>What the sharper rate buys.</strong> The constant hidden in the reduction of <span class="citation" data-cites="abel2018">(<a href="#ref-abel2018" role="doc-biblioref">Abel et al. 2018</a>, Lemma 3.4)</span> is <span class="math inline">\(C_1 = 2|G_k|\)</span>. Under the closed form this is <span class="math inline">\(\Theta\!\left(k!\,(1+\sqrt2)^k\right)\)</span>, already <span class="math inline">\(752\)</span> at <span class="math inline">\(k = 4\)</span>. The reduction is therefore linear for each fixed <span class="math inline">\(k\)</span> and catastrophic in <span class="math inline">\(k\)</span>, which is why the result is a statement about CF <span class="math inline">\(k\)</span>-Coloring for each constant <span class="math inline">\(k\)</span> rather than about the problem with <span class="math inline">\(k\)</span> given as part of the input.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="sec-references" class="level2" data-number="9">
+<h2 data-number="9" class="anchored" data-anchor-id="sec-references"><span class="header-section-number">9</span> References</h2>
+<div id="refs" class="references csl-bib-body hanging-indent" role="list">
+<div id="ref-abel2018" class="csl-entry" role="listitem">
+Abel, Zachary, Victor Alvarez, Erik D. Demaine, et al. 2018. <span>“Conflict-Free Coloring of Graphs.”</span> <em>SIAM Journal on Discrete Mathematics</em> 32 (4): 2675–702. <a href="https://doi.org/10.1137/17M1146579">https://doi.org/10.1137/17M1146579</a>.
+</div>
+</div>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
